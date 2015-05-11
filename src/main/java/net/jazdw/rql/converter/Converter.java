@@ -4,6 +4,7 @@
 
 package net.jazdw.rql.converter;
 
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,6 +75,7 @@ public class Converter {
     public static final ValueConverter ISODATE = new ValueConverter() {
         public Object convert(String input) throws ConverterException {
             try {
+                input = URLDecoder.decode(input, "UTF-8");
                 DateTimeFormatter parser = ISODateTimeFormat.dateOptionalTimeParser()
                         .withZoneUTC();
                 return parser.parseDateTime(input).toDate();
@@ -86,6 +88,7 @@ public class Converter {
     public static final ValueConverter DATE = new ValueConverter() {
         public Object convert(String input) throws ConverterException {
             try {
+                input = URLDecoder.decode(input, "UTF-8");
                 DateTimeFormatter parser = ISODateTimeFormat.dateOptionalTimeParser();
                 return parser.parseDateTime(input).toDate();
             } catch (Exception e) {
@@ -106,20 +109,18 @@ public class Converter {
     
     public static final ValueConverter STRING = new ValueConverter() {
         public Object convert(String input) throws ConverterException {
-            return input;
-            /*
             try {
                 return URLDecoder.decode(input, "UTF-8");
             } catch (Exception e) {
                 throw new ConverterException(e);
             }
-            */
         }
     };
     
     public static final ValueConverter REGEX_I = new ValueConverter() {
         public Object convert(String input) throws ConverterException {
             try {
+                input = URLDecoder.decode(input, "UTF-8");
                 return Pattern.compile(input, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
             } catch (Exception e) {
                 throw new ConverterException(e);
@@ -130,6 +131,7 @@ public class Converter {
     public static final ValueConverter REGEX = new ValueConverter() {
         public Object convert(String input) throws ConverterException {
             try {
+                input = URLDecoder.decode(input, "UTF-8");
                 return Pattern.compile(input);
             } catch (Exception e) {
                 throw new ConverterException(e);
