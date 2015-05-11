@@ -12,33 +12,6 @@ import org.apache.commons.lang3.StringUtils;
  * @author Jared Wiltshire
  */
 public class RQLToText implements SimpleASTVisitor<String> {
-    public static void main(String args[]) {
-        RQLParser parser = new RQLParser();
-        
-        String input, output;
-        SimpleASTVisitor<String> visitor = new RQLToText();
-        
-        input = "(name=jack|name=jill)&age>30";
-        output = parser.parse(input, visitor);
-        System.out.println(String.format("'%s' => %s", input, output));
-        
-        input = "(name=jack|name=jill)&date<2015-05-10T14:18:33&sort(-date)";
-        output = parser.parse(input, visitor);
-        System.out.println(String.format("'%s' => %s", input, output));
-        
-        input = "(name=jack|name=jill)&date<isodate:2015-05-10T14:18:33&sort(name)";
-        output = parser.parse(input, visitor);
-        System.out.println(String.format("'%s' => %s", input, output));
-        
-        input = "name=jack|name=jill&date<epoch:1431267513000&sort(name,-date)";
-        output = parser.parse(input, visitor);
-        System.out.println(String.format("'%s' => %s", input, output));
-        
-        input = "name=jill&age=number:8&limit(10,30)";
-        output = parser.parse(input, visitor);
-        System.out.println(String.format("'%s' => %s", input, output));
-    }
-    
     /* (non-Javadoc)
      * @see net.jazdw.rql.parser.SimpleASTVisitor#visit(net.jazdw.rql.parser.ASTNode)
      */
@@ -60,10 +33,15 @@ public class RQLToText implements SimpleASTVisitor<String> {
             return node.format("%s<=%s");
         case "ne":
             return node.format("%s!=%s");
+        case "match":
+        case "like":
+            return node.format("%s like (%s)");
         case "sort":
             return visitSort(node);
         case "limit":
             return visitLimit(node);
+        case "in":
+            return node.format("%s in (%s)");
         default:
             return node.toString();
         }

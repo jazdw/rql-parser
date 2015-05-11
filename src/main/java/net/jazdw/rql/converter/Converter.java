@@ -4,7 +4,6 @@
 
 package net.jazdw.rql.converter;
 
-import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -107,11 +106,14 @@ public class Converter {
     
     public static final ValueConverter STRING = new ValueConverter() {
         public Object convert(String input) throws ConverterException {
+            return input;
+            /*
             try {
                 return URLDecoder.decode(input, "UTF-8");
             } catch (Exception e) {
                 throw new ConverterException(e);
             }
+            */
         }
     };
     

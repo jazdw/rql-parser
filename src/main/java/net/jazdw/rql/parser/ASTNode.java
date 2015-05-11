@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author Jared Wiltshire
  */
@@ -15,6 +17,14 @@ public class ASTNode implements Iterable<Object> {
     private ASTNode parent;
     private String name;
     private final List<Object> arguments;
+    
+    public ASTNode(String name, Object... arguments) {
+        this(null, name, Arrays.asList(arguments));
+    }
+    
+    public ASTNode(String name, List<Object> arguments) {
+        this(null, name, arguments);
+    }
     
     public ASTNode(ASTNode parent, String name, Object... arguments) {
         this(parent, name, Arrays.asList(arguments));
@@ -34,21 +44,36 @@ public class ASTNode implements Iterable<Object> {
         return visitor.visit(this, param);
     }
     
-    public void removeParent() {
+    public ASTNode removeParents() {
         parent = null;
         for (Object arg : arguments) {
             if (arg instanceof ASTNode) {
-                ((ASTNode) arg).removeParent();
+                ((ASTNode) arg).removeParents();
             }
         }
+        return this;
     }
     
     public boolean isRootNode() {
         return parent == null;
     }
     
-    public void addArgument(Object argument) {
+    public ASTNode createChildNode(String name, Object... arguments) {
+        return createChildNode(name, Arrays.asList(arguments));
+    }
+    
+    public ASTNode createChildNode(String name, List<Object> arguments) {
+        ASTNode child = new ASTNode(this, name, arguments);
+        this.arguments.add(child);
+        return child;
+    }
+    
+    public ASTNode addArgument(Object argument) {
+        if (argument instanceof ASTNode) {
+            ((ASTNode) argument).parent = this;
+        }
         arguments.add(argument);
+        return this;
     }
     
     public Object removeLastArgument() {
@@ -59,10 +84,6 @@ public class ASTNode implements Iterable<Object> {
         return parent;
     }
 
-    public void setParent(ASTNode parent) {
-        this.parent = parent;
-    }
-    
     public boolean isNameValid() {
         return name != null && !name.isEmpty();
     }
@@ -73,6 +94,10 @@ public class ASTNode implements Iterable<Object> {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Object getArgument(int i) {
+        return arguments.get(i);
     }
 
     public List<Object> getArguments() {
@@ -123,8 +148,7 @@ public class ASTNode implements Iterable<Object> {
 
     @Override
     public String toString() {
-        return "ASTNode [parent=" + parent + ", name=" + name + ", arguments="
-                + arguments + "]";
+        return name + "(" + StringUtils.join(arguments, ",") + ")";
     }
 
     @Override

@@ -91,9 +91,7 @@ public final class RQLParser {
             }
         }.replace();
 
-        final ASTNode rootNode = new ASTNode(null, "");
-        
-        System.out.println(query);
+        final ASTNode rootNode = new ASTNode("");
         
         matcher = NODE_CREATE_PATTERN.matcher(query);
         String leftoverCharacters = new RegexReplacer(matcher) {
@@ -113,10 +111,7 @@ public final class RQLParser {
                     }
                 }
                 if (openBracket != null && !openBracket.isEmpty()) {
-                    ASTNode newNode = new ASTNode(node, propertyOrValue);
-                    
-                    node.addArgument(newNode);
-                    node = newNode;
+                    node = node.createChildNode(propertyOrValue);
                     
                     /*
                     // cache the last seen sort(), select(), values() and limit()
@@ -177,10 +172,14 @@ public final class RQLParser {
             throw new RQLParserException("Illegal character in query string encountered " + leftoverCharacters);
         }
         
-        rootNode.removeParent();
+        rootNode.removeParents();
         
-        if (!rootNode.isNameValid()) {
-            rootNode.setName("root");
+        // no root level conjunction i.e. just a single conditional statement or function
+        if (!rootNode.isNameValid() && rootNode.getArgumentsSize() == 1) {
+            Object arg = rootNode.getArgument(0);
+            if (arg instanceof ASTNode) {
+                return (ASTNode) arg;
+            }
         }
         
         return rootNode;
