@@ -31,6 +31,13 @@
                 </configuration>
             </plugin>
         </plugins>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-webdav-jackrabbit</artifactId>
+                <version>2.9</version>
+            </extension>
+        </extensions>
     </build>
     <dependencies>
         <dependency>
@@ -42,6 +49,12 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>2.7</version>
+        </dependency>
+        <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>4.12</version>
+          <scope>test</scope>
         </dependency>
     </dependencies>
     <organization>
@@ -57,4 +70,10 @@
       <system>github</system>
       <url>https://github.com/jazdw/rql-parser/issues</url>
     </issueManagement>
+    <distributionManagement>
+        <repository>
+          <id>jazdw</id>
+          <url>dav:https://jazdw.net/maven/</url>
+        </repository>
+    </distributionManagement>
 </project>
