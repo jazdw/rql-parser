@@ -3,9 +3,23 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.jazdw</groupId>
     <artifactId>rql-parser</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <name>RQL Parser</name>
     <description>Resource Query Language parser</description>
+    <licenses>
+      <license>
+        <name>GNU Lesser General Public License, Version 3</name>
+        <url>https://www.gnu.org/licenses/lgpl.txt</url>
+      </license>
+    </licenses>
+    <developers>
+      <developer>
+        <name>Jared Wiltshire</name>
+        <email>jaredwiltshire@gmail.com</email>
+        <organization>Jared Wiltshire</organization>
+        <organizationUrl>http://jazdw.net</organizationUrl>
+      </developer>
+    </developers>
     <build>
         <plugins>
             <plugin>
@@ -30,4 +44,17 @@
             <version>2.7</version>
         </dependency>
     </dependencies>
+    <organization>
+      <url>http://jazdw.net</url>
+      <name>Jared Wiltshire</name>
+    </organization>
+    <scm>
+      <url>https://github.com/jazdw/rql-parser</url>
+      <connection>scm:git@github.com:jazdw/rql-parser.git</connection>
+      <developerConnection>scm:git@github.com:jazdw/rql-parser.git</developerConnection>
+    </scm>
+    <issueManagement>
+      <system>github</system>
+      <url>https://github.com/jazdw/rql-parser/issues</url>
+    </issueManagement>
 </project>
