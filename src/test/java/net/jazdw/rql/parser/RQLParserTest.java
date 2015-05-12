@@ -74,7 +74,8 @@ public class RQLParserTest {
             .createChildNode("eq", "and", "no")
             .getParent()
             .createChildNode("eq", "or", "yes")
-            .getParent();
+            .getParent()
+            .removeParents();
         
         assertEquals(expected, parser.parse("and(and=no,or=yes)"));
     }

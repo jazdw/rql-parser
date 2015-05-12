@@ -16,9 +16,32 @@ import net.jazdw.rql.converter.ConverterException;
  * @author Jared Wiltshire
  */
 public final class RQLParser {
-    private static final Pattern SLASHED_PATTERN = Pattern.compile("[\\+\\*\\$\\-:\\w%\\._]*\\/[\\+\\*\\$\\-:\\w%\\._\\/]*");
-    private static final Pattern NORMALIZE_PATTERN = Pattern.compile("(\\([\\+\\*\\$\\-:\\w%\\._,]+\\)|[\\+\\*\\$\\-:\\w%\\._]*|)([<>!]?=(?:[\\w]*=)?|>|<)(\\([\\+\\*\\$\\-:\\w%\\._,]+\\)|[\\+\\*\\$\\-:\\w%\\._]*|)");
-    private static final Pattern NODE_CREATE_PATTERN = Pattern.compile("(\\))|([&\\|,])?([\\+\\*\\$\\-:\\w%\\._]*)(\\(?)");
+    // these patterns are straight from https://github.com/persvr/rql
+    // with the backslashes escaped and broken down into parts and the
+    // +*$-:\w%._ character set replaced with an inverted reserved set
+    
+    // reserved characters that we parse against, these should be percent escaped
+    // note that comma is also reserved except inside brackets
+    private static final String RESERVED = "&|()=<>";
+    
+    private static final String PROPERTY_OR_VALUE =
+            String.format("\\([^%s]+\\)|[^%1$s,]*|", RESERVED);
+    private static final String COMPARISON_OPERATOR = "[<>!]?=(?:[\\w]*=)?|>|<";
+    
+    private static final String CLOSE_BRACKET = "\\)";
+    private static final String DELIMITERS = "[&\\|,]";
+    private static final String OPEN_BRACKET = "\\(";
+    
+    private static final Pattern SLASHED_PATTERN = Pattern.compile(
+            "[\\+\\*\\$\\-:\\w%\\._]*\\/[\\+\\*\\$\\-:\\w%\\._\\/]*");
+    
+    private static final Pattern NORMALIZE_PATTERN = Pattern.compile(
+            String.format("(%s)(%s)(%1$s)",
+                    PROPERTY_OR_VALUE, COMPARISON_OPERATOR));
+    
+    private static final Pattern NODE_CREATE_PATTERN = Pattern.compile(
+            String.format("(%s)|(%s)?([^%s,]*)(%s?)",
+                    CLOSE_BRACKET, DELIMITERS, RESERVED, OPEN_BRACKET));
     
     private static final Map<String, String> operatorMap = new HashMap<String, String>();
     static {
@@ -61,6 +84,8 @@ public final class RQLParser {
 
         Matcher matcher;
         
+        // find slash delimited array patterns and convert to comma delimited with brackets
+        // e.g. quick/brown/fox  ==>  (quick,brown,fox)
         if (query.contains("/")) {
             matcher = SLASHED_PATTERN.matcher(query);
             query = new RegexReplacer(matcher) {
@@ -70,6 +95,8 @@ public final class RQLParser {
             }.replace();
         }
         
+        // convert simplified, "syntaxic sugar" comparison operators to normalized call syntax
+        // e.g. name=john  ==>  eq(name,john)
         matcher = NORMALIZE_PATTERN.matcher(query);
         query = new RegexReplacer(matcher) {
             public String replaceWith() {
@@ -95,8 +122,12 @@ public final class RQLParser {
             }
         }.replace();
 
+        // create a root node with an empty name
         final ASTNode rootNode = new ASTNode("");
         
+        // this replacer basically iteratively matches brackets and operators and replaces them
+        // with an empty string, the result is then checked later for left over characters which
+        // indicate a parsing error
         matcher = NODE_CREATE_PATTERN.matcher(query);
         String leftoverCharacters = new RegexReplacer(matcher) {
             ASTNode node = rootNode;
@@ -176,6 +207,7 @@ public final class RQLParser {
             throw new RQLParserException("Illegal character in query string encountered " + leftoverCharacters);
         }
         
+        // remove parents from each node in the tree
         rootNode.removeParents();
         
         // no root level conjunction i.e. just a single conditional statement or function

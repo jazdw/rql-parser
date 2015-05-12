@@ -47,9 +47,11 @@ public class Converter {
                 converter = converterMap.get(type);
                 input = value;
             }
+            // could throw exception if not found as other colons should probably be percent encoded
         }
         
         try {
+            // URLDecoder converts plus to space, percent encode the plus signs first
             input = URLDecoder.decode(input.replace("+", "%2B"), "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new ConverterException(e);
