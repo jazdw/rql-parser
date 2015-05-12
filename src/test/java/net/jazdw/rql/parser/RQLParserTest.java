@@ -54,6 +54,32 @@ public class RQLParserTest {
     }
     
     @Test
+    public void unicode() {
+        assertEquals(new ASTNode("eq", "ab", "\u03b1\u03b2"), parser.parse("eq(ab,%CE%B1%CE%B2)"));
+        assertEquals(new ASTNode("eq", "ab", "\u03b1\u03b2"), parser.parse("ab=%CE%B1%CE%B2"));
+    }
+    
+    @Test
+    public void percentEncoding() {
+        assertEquals(new ASTNode("eq", "equation", "(a+b)*c"), parser.parse("eq(equation,%28a+b%29*c)"));
+        assertEquals(new ASTNode("eq", "equation", "(a+b)*c"), parser.parse("equation=%28a+b%29*c"));
+        assertEquals(new ASTNode("eq", "equation", "(a+b)*c"), parser.parse("equation=%28a%2Bb%29%2Ac"));
+    }
+    
+    @Test
+    public void operatorPropertyNames() {
+        assertEquals(new ASTNode("eq", "and", "yes"), parser.parse("and=yes"));
+        
+        ASTNode expected = new ASTNode("and")
+            .createChildNode("eq", "and", "no")
+            .getParent()
+            .createChildNode("eq", "or", "yes")
+            .getParent();
+        
+        assertEquals(expected, parser.parse("and(and=no,or=yes)"));
+    }
+    
+    @Test
     public void limit() {
         assertEquals(new ASTNode("limit", 10, 30), parser.parse("limit(10,30)"));
         assertEquals(new ASTNode("limit", 10), parser.parse("limit(10)"));
@@ -61,9 +87,9 @@ public class RQLParserTest {
     
     @Test
     public void sort() {
-        assertEquals(new ASTNode("sort", "+name"), parser.parse("sort(%2bname)"));
+        assertEquals(new ASTNode("sort", "+name"), parser.parse("sort(+name)"));
         assertEquals(new ASTNode("sort", "-date"), parser.parse("sort(-date)"));
-        assertEquals(new ASTNode("sort", "+name", "-date"), parser.parse("sort(%2bname,-date)"));
+        assertEquals(new ASTNode("sort", "+name", "-date"), parser.parse("sort(+name,-date)"));
     }
     
     @Test
@@ -104,6 +130,16 @@ public class RQLParserTest {
     }
     
     @Test
+    public void numbers() {
+        // octal, correct behaviour?
+        assertEquals(24, parser.parse("number:030").getArgument(0));
+        assertEquals(30, parser.parse("number:30").getArgument(0));
+        // hex
+        assertEquals(48, parser.parse("number:0x30").getArgument(0));
+        assertEquals(0.1F, parser.parse("number:0.1").getArgument(0));
+    }
+    
+    @Test
     public void date() {
         Calendar cal = Calendar.getInstance();
         cal.clear();
@@ -131,16 +167,16 @@ public class RQLParserTest {
         Date expected = cal.getTime();
         
         // auto converter
-        assertEquals(expected, parser.parse("2015-01-01T00:00:00%2b10").getArgument(0));
-        assertEquals(expected, parser.parse("2015-01-01T00:00:00%2b10:00").getArgument(0));
-        assertEquals(expected, parser.parse("2015-01-01T00:00:00.000%2b10").getArgument(0));
-        assertEquals(expected, parser.parse("2015-01-01T00:00:00.000%2b10:00").getArgument(0));
+        assertEquals(expected, parser.parse("2015-01-01T00:00:00+10").getArgument(0));
+        assertEquals(expected, parser.parse("2015-01-01T00:00:00+10:00").getArgument(0));
+        assertEquals(expected, parser.parse("2015-01-01T00:00:00.000+10").getArgument(0));
+        assertEquals(expected, parser.parse("2015-01-01T00:00:00.000+10:00").getArgument(0));
         
         // explicit converter
-        assertEquals(expected, parser.parse("date:2015-01-01T00:00:00%2b10").getArgument(0));
-        assertEquals(expected, parser.parse("date:2015-01-01T00:00:00%2b10:00").getArgument(0));
-        assertEquals(expected, parser.parse("date:2015-01-01T00:00:00.000%2b10").getArgument(0));
-        assertEquals(expected, parser.parse("date:2015-01-01T00:00:00.000%2b10:00").getArgument(0));
+        assertEquals(expected, parser.parse("date:2015-01-01T00:00:00+10").getArgument(0));
+        assertEquals(expected, parser.parse("date:2015-01-01T00:00:00+10:00").getArgument(0));
+        assertEquals(expected, parser.parse("date:2015-01-01T00:00:00.000+10").getArgument(0));
+        assertEquals(expected, parser.parse("date:2015-01-01T00:00:00.000+10:00").getArgument(0));
     }
     
     @Test
@@ -152,9 +188,9 @@ public class RQLParserTest {
 
         // auto converter
         assertEquals(expected, parser.parse("2015-01-01T00:00:00Z").getArgument(0));
-        assertEquals(expected, parser.parse("2015-01-01T00:00:00%2b00:00").getArgument(0));
+        assertEquals(expected, parser.parse("2015-01-01T00:00:00+00:00").getArgument(0));
         assertEquals(expected, parser.parse("2015-01-01T00:00:00.000Z").getArgument(0));
-        assertEquals(expected, parser.parse("2015-01-01T00:00:00.000%2b00:00").getArgument(0));
+        assertEquals(expected, parser.parse("2015-01-01T00:00:00.000+00:00").getArgument(0));
         
         // explicit converter
         assertEquals(expected, parser.parse("isodate:2015").getArgument(0));
@@ -164,8 +200,8 @@ public class RQLParserTest {
         assertEquals(expected, parser.parse("isodate:2015-01-01T00:00:00.000").getArgument(0));
         assertEquals(expected, parser.parse("isodate:2015-01-01T00:00:00Z").getArgument(0));
         assertEquals(expected, parser.parse("isodate:2015-01-01T00:00:00.000Z").getArgument(0));
-        assertEquals(expected, parser.parse("isodate:2015-01-01T00:00:00%2b00:00").getArgument(0));
-        assertEquals(expected, parser.parse("isodate:2015-01-01T00:00:00.000%2b00:00").getArgument(0));
+        assertEquals(expected, parser.parse("isodate:2015-01-01T00:00:00+00:00").getArgument(0));
+        assertEquals(expected, parser.parse("isodate:2015-01-01T00:00:00.000+00:00").getArgument(0));
     }
     
     @Test
@@ -204,7 +240,7 @@ public class RQLParserTest {
     @Test
     public void regex() {
         Pattern expected = Pattern.compile("^.*abc$", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-        Object parsed = parser.parse("re:%5e.*abc$").getArgument(0);
+        Object parsed = parser.parse("re:^.*abc$").getArgument(0);
         assertTrue(parsed instanceof Pattern);
         Pattern parsedPattern = (Pattern) parsed;
         assertEquals(expected.pattern(), parsedPattern.pattern());
