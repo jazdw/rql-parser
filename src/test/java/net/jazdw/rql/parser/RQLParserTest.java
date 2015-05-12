@@ -30,10 +30,27 @@ public class RQLParserTest {
         ASTNode expected = new ASTNode("eq", "name", "jack");
         assertEquals(expected, parser.parse("name=jack"));
         assertEquals(expected, parser.parse("eq(name,jack)"));
+        assertEquals(expected, parser.parse("name==jack"));
         
         expected = new ASTNode("eq", "age", 30);
         assertEquals(expected, parser.parse("age=30"));
         assertEquals(expected, parser.parse("eq(age,30)"));
+        assertEquals(expected, parser.parse("age==30"));
+    }
+    
+    @Test(expected = RQLParserException.class)
+    public void missingProperty() {
+        parser.parse("=test");
+    }
+    
+    @Test(expected = RQLParserException.class)
+    public void missingProperty2() {
+        parser.parse("age=30&=test");
+    }
+    
+    @Test(expected = RQLParserException.class)
+    public void missingProperty3() {
+        parser.parse("=test&age=30");
     }
     
     @Test

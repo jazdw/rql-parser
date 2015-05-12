@@ -77,6 +77,10 @@ public final class RQLParser {
                 String operator = matcher.group(2);
                 String value = matcher.group(3);
                 
+                if (property.isEmpty()) {
+                    throw new RQLParserException("No property specified for operator '" + operator + "' at position " + matcher.start());
+                }
+                
                 if (operator.length() < 3) {
                     String mapped = operatorMap.get(operator);
                     if (mapped == null) {
