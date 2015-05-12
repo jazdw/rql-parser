@@ -126,4 +126,5 @@
         </build>
       </profile>
     </profiles>
+    <url>https://github.com/jazdw/rql-parser</url>
 </project>
