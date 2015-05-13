@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -142,10 +144,7 @@ public class RQLParserTest {
     
     @Test
     public void date() {
-        Calendar cal = Calendar.getInstance();
-        cal.clear();
-        cal.set(2015, 0, 1);
-        Date expected = cal.getTime();
+        DateTime expected = new DateTime(2015, 1, 1, 0, 0, 0, 0);
         
         // auto converter
         assertEquals(expected, parser.parse("2015-01-01").getArgument(0));
@@ -162,10 +161,8 @@ public class RQLParserTest {
     
     @Test
     public void offsetDate() {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+10:00"));
-        cal.clear();
-        cal.set(2015, 0, 1);
-        Date expected = cal.getTime();
+        DateTimeZone zone = DateTimeZone.forOffsetHours(10);
+        DateTime expected = new DateTime(2015, 1, 1, 0, 0, 0, 0, zone);
         
         // auto converter
         assertEquals(expected, parser.parse("2015-01-01T00:00:00+10").getArgument(0));
@@ -182,10 +179,8 @@ public class RQLParserTest {
     
     @Test
     public void isoDate() {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.clear();
-        cal.set(2015, 0, 1);
-        Date expected = cal.getTime();
+        DateTimeZone zone = DateTimeZone.UTC;
+        DateTime expected = new DateTime(2015, 1, 1, 0, 0, 0, 0, zone);
 
         // auto converter
         assertEquals(expected, parser.parse("2015-01-01T00:00:00Z").getArgument(0));
@@ -202,6 +197,8 @@ public class RQLParserTest {
         assertEquals(expected, parser.parse("isodate:2015-01-01T00:00:00Z").getArgument(0));
         assertEquals(expected, parser.parse("isodate:2015-01-01T00:00:00.000Z").getArgument(0));
         assertEquals(expected, parser.parse("isodate:2015-01-01T00:00:00+00:00").getArgument(0));
+        assertEquals(expected, parser.parse("isodate:2015-01-01T10:00:00+10:00").getArgument(0));
+        assertEquals(expected, parser.parse("isodate:2014-12-31T14:00:00-10:00").getArgument(0));
         assertEquals(expected, parser.parse("isodate:2015-01-01T00:00:00.000+00:00").getArgument(0));
     }
     

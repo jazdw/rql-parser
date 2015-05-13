@@ -1,5 +1,15 @@
-/**
- * Copyright (C) 2015 Jared Wiltshire. All rights reserved.
+/*
+ * Copyright (C) 2015 Jared Wiltshire (http://jazdw.net).
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Lesser General Public License
+ * (LGPL) version 3 which accompanies this distribution, and is available at
+ * https://www.gnu.org/licenses/lgpl.txt
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
  */
 
 package net.jazdw.rql.parser;
@@ -13,10 +23,21 @@ import net.jazdw.rql.converter.Converter;
 import net.jazdw.rql.converter.ConverterException;
 
 /**
+ * Resource Query Language (RQL) Parser
+ * 
+ * <p>Parses RQL encoded query strings and returns a tree of Abstract Syntax Tree
+ * (AST) nodes. These nodes can then be visited using a visitor pattern to produce
+ * a SQL query for example.</p>
+ * 
+ * <p>
+ * The RQL language is defined by Dojo Foundation's Persevere project - 
+ * <a href="https://github.com/persvr/rql">https://github.com/persvr/rql</a>
+ * </p>
+ * 
  * @author Jared Wiltshire
  */
-public final class RQLParser {
-    // these patterns are straight from https://github.com/persvr/rql
+public class RQLParser {
+    // these patterns are straight from the Persevere Javascript parser
     // with the backslashes escaped and broken down into parts and the
     // +*$-:\w%._ character set replaced with an inverted reserved set
     
