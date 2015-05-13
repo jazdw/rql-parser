@@ -73,10 +73,8 @@ public class RQLParserTest {
         assertEquals(new ASTNode("eq", "and", "yes"), parser.parse("and=yes"));
         
         ASTNode expected = new ASTNode("and")
-            .createChildNode("eq", "and", "no")
-            .getParent()
-            .createChildNode("eq", "or", "yes")
-            .getParent()
+            .createChildNode("eq", "and", "no").getParent()
+            .createChildNode("eq", "or", "yes").getParent()
             .removeParents();
         
         assertEquals(expected, parser.parse("and(and=no,or=yes)"));
@@ -99,13 +97,10 @@ public class RQLParserTest {
     public void logical() {
         ASTNode expected = new ASTNode("and")
             .createChildNode("or")
-            .createChildNode("eq", "name", "jack")
-            .getParent()
-            .createChildNode("eq", "name", "jill")
-            .getParent()
-            .getParent()
-            .createChildNode("gt", "age", 30)
-            .getParent()
+                .createChildNode("eq", "name", "jack").getParent()
+                .createChildNode("eq", "name", "jill").getParent()
+                .getParent()
+            .createChildNode("gt", "age", 30).getParent()
             .removeParents();
         
         assertEquals(expected, parser.parse("(name=jack|name=jill)&age>30"));
@@ -115,6 +110,7 @@ public class RQLParserTest {
         assertEquals(expected, parser.parse("(name=jack|name=jill)&age>number:30"));
         assertEquals(expected, parser.parse("(name=string:jack|name=jill)&age>30"));
         assertEquals(expected, parser.parse("and((name=jack|name=jill),age>30)"));
+        assertEquals(expected, parser.parse("and(or(name=jack,name=jill),age>30)"));
     }
     
     @Test
@@ -134,7 +130,7 @@ public class RQLParserTest {
     
     @Test
     public void numbers() {
-        // octal, correct behaviour?
+        // octal
         assertEquals(24, parser.parse("number:030").getArgument(0));
         assertEquals(30, parser.parse("number:30").getArgument(0));
         // hex
