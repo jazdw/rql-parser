@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.jazdw</groupId>
     <artifactId>rql-parser</artifactId>
-    <version>0.3.1-SNAPSHOT</version>
+    <version>0.3.1</version>
     <name>RQL Parser</name>
     <description>Resource Query Language parser</description>
     <licenses>
