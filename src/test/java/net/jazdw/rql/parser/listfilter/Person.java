@@ -14,18 +14,19 @@
 
 package net.jazdw.rql.parser.listfilter;
 
-import org.joda.time.LocalDate;
+import org.joda.time.DateTime;
 import org.joda.time.Years;
 
 /**
  * @author Jared Wiltshire
  */
 public class Person {
+    
     public Person() {
         
     }
     
-    public Person(String firstName, String lastName, LocalDate dateOfBirth,String gender,String nationality) {
+    public Person(String firstName, String lastName, DateTime dateOfBirth, String gender, String nationality) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
@@ -35,7 +36,7 @@ public class Person {
     
     private String firstName;
     private String lastName;
-    private LocalDate dateOfBirth;
+    private DateTime dateOfBirth;
     private String gender;
     private String nationality;
     
@@ -51,10 +52,10 @@ public class Person {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-    public LocalDate getDateOfBirth() {
+    public DateTime getDateOfBirth() {
         return dateOfBirth;
     }
-    public void setDateOfBirth(LocalDate dateOfBirth) {
+    public void setDateOfBirth(DateTime dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
     public String getGender() {
@@ -64,7 +65,7 @@ public class Person {
         this.gender = gender;
     }
     public int getAge() {
-        Years years = Years.yearsBetween(dateOfBirth, new LocalDate(System.currentTimeMillis()));
+        Years years = Years.yearsBetween(dateOfBirth, new DateTime());
         return years.getYears();
     }
 
