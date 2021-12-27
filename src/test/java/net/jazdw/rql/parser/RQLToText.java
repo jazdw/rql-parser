@@ -23,41 +23,39 @@ import org.apache.commons.lang3.StringUtils;
  * @author Jared Wiltshire
  */
 public class RQLToText implements SimpleASTVisitor<String> {
-    /* (non-Javadoc)
-     * @see net.jazdw.rql.parser.SimpleASTVisitor#visit(net.jazdw.rql.parser.ASTNode)
-     */
+
     @Override
     public String visit(ASTNode node) {
         switch (node.getName()) {
-        case "and":
-        case "or":
-            return visitAndOr(node);
-        case "eq":
-            return node.format("%s=%s");
-        case "gt":
-            return node.format("%s>%s");
-        case "ge":
-            return node.format("%s>=%s");
-        case "lt":
-            return node.format("%s<%s");
-        case "le":
-            return node.format("%s<=%s");
-        case "ne":
-            return node.format("%s!=%s");
-        case "match":
-        case "like":
-            return node.format("%s like (%s)");
-        case "sort":
-            return visitSort(node);
-        case "limit":
-            return visitLimit(node);
-        case "in":
-            return node.format("%s in (%s)");
-        default:
-            return node.toString();
+            case "and":
+            case "or":
+                return visitAndOr(node);
+            case "eq":
+                return node.format("%s=%s");
+            case "gt":
+                return node.format("%s>%s");
+            case "ge":
+                return node.format("%s>=%s");
+            case "lt":
+                return node.format("%s<%s");
+            case "le":
+                return node.format("%s<=%s");
+            case "ne":
+                return node.format("%s!=%s");
+            case "match":
+            case "like":
+                return node.format("%s like (%s)");
+            case "sort":
+                return visitSort(node);
+            case "limit":
+                return visitLimit(node);
+            case "in":
+                return node.format("%s in (%s)");
+            default:
+                return node.toString();
         }
     }
-    
+
     private String visitLimit(ASTNode node) {
         if (node.getArgumentsSize() == 2) {
             return node.format("limit %s offset %s");
@@ -67,7 +65,7 @@ public class RQLToText implements SimpleASTVisitor<String> {
     }
 
     public String visitSort(ASTNode node) {
-        List<String> sortProps = new ArrayList<String>();
+        List<String> sortProps = new ArrayList<>();
         for (Object obj : node) {
             boolean descending = false;
             String prop = (String) obj;
@@ -82,9 +80,9 @@ public class RQLToText implements SimpleASTVisitor<String> {
         }
         return "sort by " + StringUtils.join(sortProps, ", ");
     }
-    
+
     public String visitAndOr(ASTNode node) {
-        List<String> components = new ArrayList<String>();
+        List<String> components = new ArrayList<>();
         for (Object obj : node) {
             if (obj instanceof ASTNode) {
                 components.add(((ASTNode) obj).accept(this));

@@ -15,14 +15,17 @@
 package net.jazdw.rql.converter;
 
 /**
+ * @param <T> output type
  * @author Jared Wiltshire
  */
-public interface ValueConverter {
+@FunctionalInterface
+public interface ValueConverter<T> {
     /**
      * Converts a string value to its Java object representation
-     * @param input
-     * @return
-     * @throws ConverterException
+     *
+     * @param input input string from RQL
+     * @return converted output
+     * @throws ConverterException if converter encountered error converting
      */
-    public Object convert(String input) throws ConverterException;
+    T convert(String input) throws ConverterException;
 }
