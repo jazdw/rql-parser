@@ -111,6 +111,9 @@
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
+                                <configuration>
+                                    <doclint>all,-missing</doclint>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -125,10 +128,6 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
-                                <configuration>
-                                    <keyname>4518FD6E</keyname>
-                                    <passphraseServerId>4518FD6E</passphraseServerId>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
