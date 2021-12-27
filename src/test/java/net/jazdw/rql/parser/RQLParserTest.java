@@ -22,11 +22,14 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -217,6 +220,14 @@ public class RQLParserTest {
     public void epoch() {
         Instant expected = Instant.ofEpochMilli(1420117993131L);
         assertEquals(expected, parser.parse("epoch:1420117993131").getArgument(0));
+    }
+
+    @Test
+    @Ignore
+    public void zonedDateTime() {
+        LocalDateTime local = LocalDateTime.of(2011, 12, 3, 10, 15, 30);
+        ZonedDateTime expected = ZonedDateTime.of(local, ZoneId.of("Europe/Paris"));
+        assertEquals(expected, parser.parse("date:2011-12-03T10:15:30+01:00[Europe/Paris]").getArgument(0));
     }
 
     @Test
