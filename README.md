@@ -22,6 +22,6 @@ See the [ListFilter](https://github.com/jazdw/rql-parser/blob/master/src/test/ja
 <dependency>
   <groupId>net.jazdw</groupId>
   <artifactId>rql-parser</artifactId>
-  <version>0.3.1</version>
+  <version>0.4.0</version>
 </dependency>
 ````
