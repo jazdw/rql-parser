@@ -17,6 +17,7 @@ package net.jazdw.rql.parser.listfilter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.collections.comparators.ComparatorChain;
 
 import net.jazdw.rql.parser.ASTNode;
 import net.jazdw.rql.parser.ASTVisitor;
@@ -130,15 +130,23 @@ public class ListFilter<T> implements ASTVisitor<List<T>, List<T>> {
 
                 return list.subList(offset, toIndex);
             case "sort":
-                ComparatorChain cc = new ComparatorChain();
+                Comparator<T> comparator = null;
                 for (Object obj : node) {
                     String sortOption = (String) obj;
                     boolean desc = sortOption.startsWith("-");
-                    cc.addComparator(new BeanComparator<T>(sortOption.substring(1)), desc);
+
+                    Comparator<T> beanComparator = new BeanComparator<T>(sortOption.substring(1));
+                    if (desc) {
+                        beanComparator = beanComparator.reversed();
+                    }
+
+                    comparator = comparator == null ? beanComparator : comparator.thenComparing(beanComparator);
                 }
-                // copy the list as we are modifying it
-                list = new ArrayList<>(list);
-                list.sort(cc);
+                if (comparator != null) {
+                    // copy the list as we are modifying it
+                    list = new ArrayList<>(list);
+                    list.sort(comparator);
+                }
                 return list;
             default:
                 throw new UnsupportedOperationException(String.format("Encountered unknown operator '%s'", node.getName()));
