@@ -158,7 +158,7 @@ public class Converter {
      */
     public static class ZonedDateTimeConverter implements ValueConverter<ZonedDateTime> {
 
-        public static final OffsetDateTimeConverter INSTANCE = new OffsetDateTimeConverter();
+        public static final ZonedDateTimeConverter INSTANCE = new ZonedDateTimeConverter();
 
         /**
          * @param input e.g. {@code 2011-12-03T10:15:30+01:00[Europe/Paris]}

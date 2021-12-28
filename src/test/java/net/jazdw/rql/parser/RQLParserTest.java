@@ -223,11 +223,10 @@ public class RQLParserTest {
     }
 
     @Test
-    @Ignore
     public void zonedDateTime() {
         LocalDateTime local = LocalDateTime.of(2011, 12, 3, 10, 15, 30);
         ZonedDateTime expected = ZonedDateTime.of(local, ZoneId.of("Europe/Paris"));
-        assertEquals(expected, parser.parse("date:2011-12-03T10:15:30+01:00[Europe/Paris]").getArgument(0));
+        assertEquals(expected, parser.parse("date:2011-12-03T10%3A15%3A30%2B01%3A00%5BEurope%2FParis%5D").getArgument(0));
     }
 
     @Test
