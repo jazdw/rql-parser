@@ -181,7 +181,7 @@ public class RQLParserTest {
     @Test
     public void offsetDateTime() {
         LocalDateTime local = LocalDateTime.of(2015, 1, 1, 0, 0, 0);
-        OffsetDateTime expected = OffsetDateTime.of(local, ZoneOffset.ofHoursMinutes(10, 0));
+        ZonedDateTime expected = ZonedDateTime.of(local, ZoneOffset.ofHoursMinutes(10, 0));
 
         // auto converter
         assertEquals(expected, parser.parse("2015-01-01T00:00:00+10").getArgument(0));
@@ -199,7 +199,7 @@ public class RQLParserTest {
     @Test
     public void utcDateTime() {
         LocalDateTime local = LocalDateTime.of(2015, 1, 1, 0, 0);
-        OffsetDateTime expected = OffsetDateTime.of(local, ZoneOffset.UTC);
+        ZonedDateTime expected = ZonedDateTime.of(local, ZoneOffset.UTC);
 
         // auto converter
         assertEquals(expected, parser.parse("2015-01-01T00:00:00Z").getArgument(0));

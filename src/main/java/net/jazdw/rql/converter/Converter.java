@@ -154,39 +154,19 @@ public class Converter {
     }
 
     /**
-     * Converter for ISO 8601 formatted date-time with a zone.
+     * Converter for ISO 8601 formatted date-time with a zone/offset.
      */
     public static class ZonedDateTimeConverter implements ValueConverter<ZonedDateTime> {
 
         public static final ZonedDateTimeConverter INSTANCE = new ZonedDateTimeConverter();
 
         /**
-         * @param input e.g. {@code 2011-12-03T10:15:30+01:00[Europe/Paris]}
+         * @param input e.g. {@code 2011-12-03T10:15:30+01:00[Europe/Paris]} or {@code 2015-01-01T15:13:54+10:30}
          */
         @Override
         public ZonedDateTime convert(String input) throws ConverterException {
             try {
                 return ZonedDateTime.parse(input, DateTimeFormatter.ISO_ZONED_DATE_TIME);
-            } catch (DateTimeParseException e) {
-                throw new ConverterException(e);
-            }
-        }
-    }
-
-    /**
-     * Converter for ISO 8601 formatted date-time with an offset.
-     */
-    public static class OffsetDateTimeConverter implements ValueConverter<OffsetDateTime> {
-
-        public static final OffsetDateTimeConverter INSTANCE = new OffsetDateTimeConverter();
-
-        /**
-         * @param input e.g. {@code 2015-01-01T15:13:54+10:30}
-         */
-        @Override
-        public OffsetDateTime convert(String input) throws ConverterException {
-            try {
-                return OffsetDateTime.parse(input, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             } catch (DateTimeParseException e) {
                 throw new ConverterException(e);
             }
@@ -234,7 +214,7 @@ public class Converter {
     }
 
     /**
-     * Tries to convert to ZonedDateTime, then OffsetDateTime, then finally LocalDateTime.
+     * Tries to convert to ZonedDateTime, then LocalDateTime, then finally LocalDate.
      */
     public static class GenericDateTimeConverter implements ValueConverter<Temporal> {
 
@@ -244,11 +224,6 @@ public class Converter {
         public Temporal convert(String input) throws ConverterException {
             try {
                 return ZonedDateTimeConverter.INSTANCE.convert(input);
-            } catch (ConverterException e) {
-                // ignore
-            }
-            try {
-                return OffsetDateTimeConverter.INSTANCE.convert(input);
             } catch (ConverterException e) {
                 // ignore
             }
