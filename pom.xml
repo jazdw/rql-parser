@@ -78,8 +78,8 @@
         <url>https://github.com/jazdw/rql-parser/tree/main</url>
         <connection>scm:git:https://github.com/jazdw/rql-parser.git</connection>
         <developerConnection>scm:git:https://github.com/jazdw/rql-parser.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
     <issueManagement>
         <system>github</system>
         <url>https://github.com/jazdw/rql-parser/issues</url>
