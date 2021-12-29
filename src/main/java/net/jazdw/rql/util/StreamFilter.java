@@ -11,14 +11,14 @@ public class StreamFilter<T> implements UnaryOperator<Stream<T>> {
 
     private final Predicate<T> predicate;
     private final Comparator<T> sort;
-    private final Long offset;
     private final Long limit;
+    private final Long offset;
 
-    public StreamFilter(Predicate<T> predicate, Comparator<T> sort, Long offset, Long limit) {
+    public StreamFilter(Predicate<T> predicate, Comparator<T> sort, Long limit, Long offset) {
         this.predicate = predicate;
         this.sort = sort;
-        this.offset = offset;
         this.limit = limit;
+        this.offset = offset;
     }
 
     @Override

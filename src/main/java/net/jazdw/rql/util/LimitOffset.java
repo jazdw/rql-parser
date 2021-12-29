@@ -1,19 +1,19 @@
 package net.jazdw.rql.util;
 
-public class OffsetLimit {
-    private final Long offset;
+public class LimitOffset {
     private final Long limit;
+    private final Long offset;
 
-    public OffsetLimit(Long offset, Long limit) {
+    public LimitOffset(Long limit, Long offset) {
         this.offset = offset;
         this.limit = limit;
     }
 
-    public Long getOffset() {
-        return offset;
-    }
-
     public Long getLimit() {
         return limit;
+    }
+
+    public Long getOffset() {
+        return offset;
     }
 }
