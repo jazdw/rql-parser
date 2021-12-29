@@ -39,12 +39,12 @@ query
 
 expression
     : OPEN_PARENTHESIS expression? CLOSE_PARENTHESIS #group
-    | op=(AND|OR|NOT) OPEN_PARENTHESIS expression? (COMMA expression)* CLOSE_PARENTHESIS #logical
+    | logicalOperator OPEN_PARENTHESIS expression? (COMMA expression)* CLOSE_PARENTHESIS #logical
     | expression AMPERSAND expression #and
     | expression VERTICAL_BAR expression #or
-    | op=PREDICATE OPEN_PARENTHESIS identifier COMMA value (COMMA value)* CLOSE_PARENTHESIS #predicate
+    | predicateOperator OPEN_PARENTHESIS identifier COMMA value (COMMA value)* CLOSE_PARENTHESIS #predicate
     | functionName OPEN_PARENTHESIS value? (COMMA value)* CLOSE_PARENTHESIS #function
-    | identifier EQUALS_SIGN op=PREDICATE EQUALS_SIGN value #predicate
+    | identifier EQUALS_SIGN predicateOperator EQUALS_SIGN value #predicate
     | identifier EQUALS_SIGN value #equals
     ;
 
@@ -70,6 +70,23 @@ arrayValue
     : OPEN_PARENTHESIS value? (COMMA value)* CLOSE_PARENTHESIS
     ;
 
+logicalOperator
+    : op=(AND
+    | OR
+    | NOT)
+    ;
+
+predicateOperator
+    : op=(EQUALS
+    | NOT_EQUALS
+    | LESS_THAN
+    | LESS_THAN_OR_EQUAL
+    | GREATER_THAN
+    | GREATER_THAN_OR_EQUAL
+    | IN
+    | CONTAINS)
+    ;
+
 /* Lexer rules */
 
 fragment ALPHA      : [a-zA-Z] ;
@@ -84,26 +101,9 @@ CLOSE_PARENTHESIS   : ')' ;
 COMMA               : ',' ;
 COLON               : ':' ;
 
-//LOGICAL
-//    : AND
-//    | OR
-//    | NOT
-//    ;
-
 AND                 : 'and' ;
 OR                  : 'or' ;
 NOT                 : 'not' ;
-
-PREDICATE
-    : EQUALS
-    | NOT_EQUALS
-    | LESS_THAN
-    | LESS_THAN_OR_EQUAL
-    | GREATER_THAN
-    | GREATER_THAN_OR_EQUAL
-    | IN
-    | CONTAINS
-    ;
 
 EQUALS                  : 'eq' ;
 NOT_EQUALS              : 'ne' ;

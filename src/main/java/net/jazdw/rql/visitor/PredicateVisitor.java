@@ -43,7 +43,7 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
     @Override
     public Predicate<T> visitLogical(LogicalContext ctx) {
         List<Predicate<T>> childPredicates = childPredicates(ctx.expression());
-        switch (ctx.op.getType()) {
+        switch (ctx.logicalOperator().op.getType()) {
             case RqlParser.AND:
                 return item -> childPredicates.stream().allMatch(p -> p.test(item));
             case RqlParser.OR:
