@@ -73,10 +73,7 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
     public Predicate<T> visitEquals(EqualsContext ctx) {
         String propertyName = decoder.apply(ctx.identifier().id.getText());
         Object value = valueVisitor.visitValue(ctx.value());
-
-        Comparator<String> comparator = Comparator.naturalOrder();
-        // TODO comparator
-        return (item) -> comparator.compare("" + accessor.getProperty(item, propertyName), "" + value) == 0;
+        return (item) -> getComparator(propertyName).compare(accessor.getProperty(item, propertyName), value) == 0;
     }
 
     @Override
@@ -94,15 +91,7 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
             case RqlParser.GREATER_THAN_OR_EQUAL:
                 return (item) -> {
                     Object propertyValue = accessor.getProperty(item, propertyName);
-                    int result;
-
-                    if (propertyValue instanceof Comparable) {
-                        Comparable comparableProperty = (Comparable) propertyValue;
-                        result = comparableProperty.compareTo((Comparable) firstArg);
-                    } else {
-                        result = String.valueOf(propertyValue).compareTo(String.valueOf(firstArg));
-                    }
-
+                    int result = getComparator(propertyName).compare(propertyValue, firstArg);
                     return checkComparatorResult(operator, result);
                 };
             case RqlParser.CONTAINS:
@@ -128,6 +117,42 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
             }
             default:
                 throw new UnsupportedOperationException("Unsupported predicate type: " + operator.getText());
+        }
+    }
+
+    protected Comparator<Object> getComparator(String propertyName) {
+        return DefaultComparator.INSTANCE;
+    }
+
+    protected Comparator<T> getSortComparator(String property) {
+        Comparator<Object> propertyComparator = getComparator(property);
+        return (a, b) -> {
+            Object valueA = accessor.getProperty(a, property);
+            Object valueB = accessor.getProperty(b, property);
+            return propertyComparator.compare(valueA, valueB);
+        };
+    }
+
+    private static class DefaultComparator implements Comparator<Object> {
+        public static final DefaultComparator INSTANCE = new DefaultComparator();
+
+        @Override
+        public int compare(Object a, Object b) {
+            if (a == b) {
+                return 0;
+            } else if (a == null) {
+                return -1;
+            } else if (b == null) {
+                return 1;
+            } else if (a instanceof Comparable) {
+                try {
+                    //noinspection unchecked,rawtypes
+                    return ((Comparable) a).compareTo(b);
+                } catch (ClassCastException e) {
+                    // ignore
+                }
+            }
+            return String.valueOf(a).compareTo(String.valueOf(b));
         }
     }
 

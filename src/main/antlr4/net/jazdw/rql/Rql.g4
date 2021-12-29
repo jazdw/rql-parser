@@ -84,7 +84,8 @@ predicateOperator
     | GREATER_THAN
     | GREATER_THAN_OR_EQUAL
     | IN
-    | CONTAINS)
+    | CONTAINS
+    | MATCH)
     ;
 
 /* Lexer rules */
@@ -113,6 +114,7 @@ GREATER_THAN            : 'gt' ;
 GREATER_THAN_OR_EQUAL   : 'ge' ;
 IN                      : 'in' ;
 CONTAINS                : 'contains' ;
+MATCH                   : 'match' ;
 
 TEXT
     : (UNRESERVED | PERCENT_ENCODED | '*' | '+')+

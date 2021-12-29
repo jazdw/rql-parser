@@ -184,7 +184,7 @@ public class AntlrListFilterTest {
 
     @Test
     public void testMatch() {
-        RqlParser parser = createParser("firstName=like=*azza");
+        RqlParser parser = createParser("firstName=match=*azza");
         List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(3, results.size());
         for (Person p : results) {
