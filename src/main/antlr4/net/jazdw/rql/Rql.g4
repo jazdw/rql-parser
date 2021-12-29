@@ -39,7 +39,7 @@ query
 
 expression
     : OPEN_PARENTHESIS expression? CLOSE_PARENTHESIS #group
-    | LOGICAL OPEN_PARENTHESIS expression? (COMMA expression)* CLOSE_PARENTHESIS #logical
+    | op=(AND|OR|NOT) OPEN_PARENTHESIS expression? (COMMA expression)* CLOSE_PARENTHESIS #logical
     | expression AMPERSAND expression #and
     | expression VERTICAL_BAR expression #or
     | op=PREDICATE OPEN_PARENTHESIS identifier COMMA value (COMMA value)* CLOSE_PARENTHESIS #predicate
@@ -84,11 +84,11 @@ CLOSE_PARENTHESIS   : ')' ;
 COMMA               : ',' ;
 COLON               : ':' ;
 
-LOGICAL
-    : AND
-    | OR
-    | NOT
-    ;
+//LOGICAL
+//    : AND
+//    | OR
+//    | NOT
+//    ;
 
 AND                 : 'and' ;
 OR                  : 'or' ;

@@ -7,9 +7,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import net.jazdw.rql.RqlBaseVisitor;
+import net.jazdw.rql.RqlParser;
 import net.jazdw.rql.RqlParser.AndContext;
 import net.jazdw.rql.RqlParser.EqualsContext;
 import net.jazdw.rql.RqlParser.ExpressionContext;
+import net.jazdw.rql.RqlParser.LogicalContext;
+import net.jazdw.rql.RqlParser.OrContext;
 import net.jazdw.rql.util.PropertyAccessor;
 import net.jazdw.rql.util.TextDecoder;
 
@@ -29,6 +32,30 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
     public Predicate<T> visitAnd(AndContext ctx) {
         List<Predicate<T>> childPredicates = childPredicates(ctx.expression());
         return item -> childPredicates.stream().allMatch(p -> p.test(item));
+    }
+
+    @Override
+    public Predicate<T> visitOr(OrContext ctx) {
+        List<Predicate<T>> childPredicates = childPredicates(ctx.expression());
+        return item -> childPredicates.stream().anyMatch(p -> p.test(item));
+    }
+
+    @Override
+    public Predicate<T> visitLogical(LogicalContext ctx) {
+        List<Predicate<T>> childPredicates = childPredicates(ctx.expression());
+        switch (ctx.op.getType()) {
+            case RqlParser.AND:
+                return item -> childPredicates.stream().allMatch(p -> p.test(item));
+            case RqlParser.OR:
+                return item -> childPredicates.stream().anyMatch(p -> p.test(item));
+            case RqlParser.NOT:
+                if (childPredicates.size() != 1) {
+                    throw new IllegalStateException("NOT logical operator must have one child");
+                }
+                return childPredicates.get(0).negate();
+            default:
+                throw new IllegalStateException("Unknown logical operation type");
+        }
     }
 
     @Override

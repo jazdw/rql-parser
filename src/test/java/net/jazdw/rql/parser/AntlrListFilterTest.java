@@ -15,6 +15,7 @@
 package net.jazdw.rql.parser;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
@@ -105,11 +106,51 @@ public class AntlrListFilterTest {
     }
 
     @Test
-    public void testBasicAnd() {
+    public void testBasicAndSymbol() {
         RqlParser parser = createParser("firstName=Shazza&lastName=Smith");
         List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(SHAZZA_SMITH, results.get(0));
+    }
+
+    @Test
+    public void testBasicOrSymbol() {
+        RqlParser parser = createParser("firstName=Shazza|lastName=Smith");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(5, results.size());
+        assertTrue(results.contains(HARRY_SMITH));
+        assertTrue(results.contains(JILL_SMITH));
+        assertTrue(results.contains(OLIVER_SMITH));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
+    }
+
+    @Test
+    public void testBasicAnd() {
+        RqlParser parser = createParser("and(firstName=Shazza,lastName=Smith)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(1, results.size());
+        assertEquals(SHAZZA_SMITH, results.get(0));
+    }
+
+    @Test
+    public void testBasicOr() {
+        RqlParser parser = createParser("or(firstName=Shazza,lastName=Smith)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(5, results.size());
+        assertTrue(results.contains(HARRY_SMITH));
+        assertTrue(results.contains(JILL_SMITH));
+        assertTrue(results.contains(OLIVER_SMITH));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
+    }
+
+    @Test
+    public void testNot() {
+        RqlParser parser = createParser("not(and(firstName=Shazza,lastName=Smith))");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(PEOPLE.size() - 1, results.size());
+        assertFalse(results.contains(SHAZZA_SMITH));
     }
 
     @Test
