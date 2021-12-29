@@ -94,23 +94,27 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
                     int result = accessor.getComparator(propertyName).compare(propertyValue, firstArg);
                     return checkComparatorResult(operator, result);
                 };
-            case RqlParser.MATCH:
+            case RqlParser.MATCH: {
+                Pattern pattern;
+                if (firstArg instanceof Pattern) {
+                    pattern = (Pattern) firstArg;
+                } else if (firstArg instanceof String) {
+                    String regex = (String) firstArg;
+                    pattern = Pattern.compile(regex.replace("*", ".*"),
+                            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+                } else {
+                    throw new IllegalStateException("Must be pattern or regex");
+                }
+
                 return (item) -> {
                     Object propertyValue = accessor.getProperty(item, propertyName);
                     if (propertyValue instanceof String) {
                         String valueString = (String) propertyValue;
-                        if (firstArg instanceof Pattern) {
-                            Pattern regex = (Pattern) firstArg;
-                            return regex.matcher(valueString).matches();
-                        } else if (firstArg instanceof String) {
-                            String regex = (String) firstArg;
-                            Pattern pattern = Pattern.compile(regex.replace("*", ".*"),
-                                    Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-                            return pattern.matcher(valueString).matches();
-                        }
+                        return pattern.matcher(valueString).matches();
                     }
                     return false;
                 };
+            }
             case RqlParser.CONTAINS:
                 return (item) -> {
                     Object propertyValue = accessor.getProperty(item, propertyName);

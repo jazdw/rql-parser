@@ -198,7 +198,7 @@ public class AntlrListFilterTest {
             assertTrue(p.getFirstName().startsWith("M"));
         }
 
-        parser = createParser("lastName=match=*Ñ*");
+        parser = createParser("lastName=match=*%C3%91*");
         results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(MANUEL_MUNOZ, results.get(0));
