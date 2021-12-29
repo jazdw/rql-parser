@@ -39,28 +39,28 @@ expression
     | LOGICAL OPEN_PARENTHESIS expression? (COMMA expression)* CLOSE_PARENTHESIS #logical
     | expression AMPERSAND expression #and
     | expression VERTICAL_BAR expression #or
-    | PREDICATE OPEN_PARENTHESIS identifier COMMA value (COMMA value)* CLOSE_PARENTHESIS #predicate
+    | op=PREDICATE OPEN_PARENTHESIS identifier COMMA value (COMMA value)* CLOSE_PARENTHESIS #predicate
     | functionName OPEN_PARENTHESIS value? (COMMA value)* CLOSE_PARENTHESIS #function
-    | identifier EQUALS_SIGN PREDICATE EQUALS_SIGN value #predicate
+    | identifier EQUALS_SIGN op=PREDICATE EQUALS_SIGN value #predicate
     | identifier EQUALS_SIGN value #equals
     ;
 
 functionName
-    : TEXT
+    : name=TEXT
     ;
 
 identifier
-    : TEXT
+    : id=TEXT
     ;
 
 value
-    : TEXT
+    : textValue=TEXT
     | typedValue
     | arrayValue
     ;
 
 typedValue
-    : TEXT COLON TEXT
+    : type=TEXT COLON textValue=TEXT
     ;
 
 arrayValue

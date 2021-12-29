@@ -14,6 +14,7 @@
 
 package net.jazdw.rql.converter;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -30,17 +31,20 @@ import net.jazdw.rql.converter.Converter.NumberConverter;
  * @author Jared Wiltshire
  */
 class AutoValueConverter implements ValueConverter<Object> {
+
     /**
      * The default automatic conversion map
      */
-    public static final Map<String, Object> DEFAULT_CONVERSIONS = new HashMap<>();
+    public static final Map<String, Object> DEFAULT_CONVERSIONS;
 
     static {
-        DEFAULT_CONVERSIONS.put("true", Boolean.TRUE);
-        DEFAULT_CONVERSIONS.put("false", Boolean.FALSE);
-        DEFAULT_CONVERSIONS.put("null", null);
-        DEFAULT_CONVERSIONS.put("Infinity", Double.POSITIVE_INFINITY);
-        DEFAULT_CONVERSIONS.put("-Infinity", Double.NEGATIVE_INFINITY);
+        Map<String, Object> defaultConversions = new HashMap<>();
+        defaultConversions.put("true", Boolean.TRUE);
+        defaultConversions.put("false", Boolean.FALSE);
+        defaultConversions.put("null", null);
+        defaultConversions.put("Infinity", Double.POSITIVE_INFINITY);
+        defaultConversions.put("-Infinity", Double.NEGATIVE_INFINITY);
+        DEFAULT_CONVERSIONS = Collections.unmodifiableMap(defaultConversions);
     }
 
     // detects ISO 8601 dates with a minimum of year, month and day specified
@@ -52,33 +56,34 @@ class AutoValueConverter implements ValueConverter<Object> {
         this(DEFAULT_CONVERSIONS);
     }
 
-    public AutoValueConverter(Map<String, Object> autoConversionMap) {
-        this.conversions = new HashMap<>(autoConversionMap);
+    public AutoValueConverter(Map<String, Object> conversions) {
+        this.conversions = conversions;
     }
 
-    public Object convert(String input) throws ConverterException {
+    @Override
+    public Object convert(String textValue) {
         try {
-            if (conversions.containsKey(input)) {
-                return conversions.get(input);
+            if (conversions.containsKey(textValue)) {
+                return conversions.get(textValue);
             }
 
             try {
-                if (NumberUtils.isCreatable(input)) {
-                    return NumberConverter.INSTANCE.convert(input);
+                if (NumberUtils.isCreatable(textValue)) {
+                    return NumberConverter.INSTANCE.convert(textValue);
                 }
             } catch (ConverterException e) {
                 // ignore
             }
 
             try {
-                if (DATE_PATTERN.matcher(input).matches()) {
-                    return GenericDateTimeConverter.INSTANCE.convert(input);
+                if (DATE_PATTERN.matcher(textValue).matches()) {
+                    return GenericDateTimeConverter.INSTANCE.convert(textValue);
                 }
             } catch (ConverterException e) {
                 // ignore
             }
 
-            return input;
+            return textValue;
         } catch (Exception e) {
             throw new ConverterException(e);
         }

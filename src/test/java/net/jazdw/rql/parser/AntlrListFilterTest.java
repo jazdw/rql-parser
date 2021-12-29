@@ -17,8 +17,11 @@ package net.jazdw.rql.parser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
@@ -29,8 +32,8 @@ import org.junit.Test;
 
 import net.jazdw.rql.RqlLexer;
 import net.jazdw.rql.RqlParser;
-import net.jazdw.rql.parser.listfilter.AntlrListFilter;
 import net.jazdw.rql.parser.listfilter.Person;
+import net.jazdw.rql.visitor.QueryVisitor;
 
 /**
  * @author Jared Wiltshire
@@ -41,14 +44,14 @@ public class AntlrListFilterTest {
             CharStream inputStream = CharStreams.fromString(rql);
             RqlLexer lexer = new RqlLexer(inputStream);
             CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-            RqlParser parser =  new RqlParser(tokenStream);
+            RqlParser parser = new RqlParser(tokenStream);
             parser.setErrorHandler(new BailErrorStrategy());
             return parser;
         }
     }
 
     ParserShim parser;
-    AntlrListFilter<Person> filter;
+    QueryVisitor<Person> filter;
 
     static final Person HARRY_SMITH = new Person("Harry", "Smith", LocalDate.of(1954, 3, 18), "Male", "English");
     static final Person JILL_SMITH = new Person("Jill", "Smith", LocalDate.of(2001, 1, 16), "Female", "English");
@@ -88,7 +91,20 @@ public class AntlrListFilterTest {
     @Before
     public void before() {
         parser = new ParserShim();
-        filter = new AntlrListFilter<>();
+        filter = new QueryVisitor<>(this::getProperty);
+    }
+
+    /**
+     * Basic reflection based property access, do not use in production.
+     */
+    private Object getProperty(Person item, String propertyName) {
+        String upperFirstChar = propertyName.substring(0, 1).toUpperCase(Locale.ROOT) + propertyName.substring(1);
+        try {
+            Method method = item.getClass().getDeclaredMethod("get" + upperFirstChar);
+            return method.invoke(item);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException(String.format("Error accessing property named '%s'", propertyName), e);
+        }
     }
 
     @Test

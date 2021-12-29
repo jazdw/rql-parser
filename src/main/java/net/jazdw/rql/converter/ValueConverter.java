@@ -21,11 +21,21 @@ package net.jazdw.rql.converter;
 @FunctionalInterface
 public interface ValueConverter<T> {
     /**
-     * Converts a string value to its Java object representation
+     * Converts a string value to its Java representation
      *
-     * @param input input string from RQL
-     * @return converted output
-     * @throws ConverterException if converter encountered error converting
+     * @param textValue percent-decoded value string (e.g. {@code john}, {@code 2015-01-01} or {@code 30})
+     * @return converted value
+     * @throws ConverterException if converter encountered error while converting
      */
-    T convert(String input) throws ConverterException;
+    T convert(String textValue);
+
+    /**
+     * @param type      percent-decoded type, used to interpret input string (e.g. {@code string}, {@code date} or {@code number})
+     * @param textValue percent-decoded value string (e.g. {@code john}, {@code 2015-01-01} or {@code 30})
+     * @return converted value
+     * @throws ConverterException if converter encountered error while converting
+     */
+    default T convert(String type, String textValue) {
+        return convert(textValue);
+    }
 }

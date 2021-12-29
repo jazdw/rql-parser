@@ -17,11 +17,15 @@ package net.jazdw.rql.converter;
 /**
  * @author Jared Wiltshire
  */
-public class ConverterException extends Exception {
-    private static final long serialVersionUID = 1L;
+public class ConverterException extends RuntimeException {
+    private static final long serialVersionUID = -5576263282605950516L;
 
     public ConverterException(String message) {
         super(message);
+    }
+
+    public ConverterException(String message, Throwable cause) {
+        super(message, cause);
     }
 
     public ConverterException(Throwable cause) {
