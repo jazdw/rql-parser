@@ -17,6 +17,7 @@ import net.jazdw.rql.util.TextDecoder;
 public class QueryVisitor<T> extends RqlBaseVisitor<StreamFilter<T>> {
 
     private final PredicateVisitor<T> predicateVisitor;
+    private final SortVisitor<T> sortVisitor;
     private final LimitOffsetVisitor limitOffsetVisitor;
 
     public QueryVisitor(PropertyAccessor<T, Object> accessor) {
@@ -25,6 +26,7 @@ public class QueryVisitor<T> extends RqlBaseVisitor<StreamFilter<T>> {
         ValueVisitor valueVisitor = new ValueVisitor(decoder, converter);
 
         this.predicateVisitor = new PredicateVisitor<>(decoder, valueVisitor, accessor);
+        this.sortVisitor = new SortVisitor<>(decoder, valueVisitor, accessor);
         this.limitOffsetVisitor = new LimitOffsetVisitor(decoder, valueVisitor);
     }
 
@@ -38,6 +40,7 @@ public class QueryVisitor<T> extends RqlBaseVisitor<StreamFilter<T>> {
         ExpressionContext expression = ctx.expression();
         if (expression != null) {
             predicate = expression.accept(predicateVisitor);
+            sort = expression.accept(sortVisitor);
             LimitOffset limitOffset = expression.accept(limitOffsetVisitor);
             if (limitOffset != null) {
                 limit = limitOffset.getLimit();

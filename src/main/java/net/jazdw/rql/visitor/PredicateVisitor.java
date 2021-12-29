@@ -1,7 +1,6 @@
 package net.jazdw.rql.visitor;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -73,7 +72,7 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
     public Predicate<T> visitEquals(EqualsContext ctx) {
         String propertyName = decoder.apply(ctx.identifier().id.getText());
         Object value = valueVisitor.visitValue(ctx.value());
-        return (item) -> getComparator(propertyName).compare(accessor.getProperty(item, propertyName), value) == 0;
+        return (item) -> accessor.getComparator(propertyName).compare(accessor.getProperty(item, propertyName), value) == 0;
     }
 
     @Override
@@ -91,7 +90,7 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
             case RqlParser.GREATER_THAN_OR_EQUAL:
                 return (item) -> {
                     Object propertyValue = accessor.getProperty(item, propertyName);
-                    int result = getComparator(propertyName).compare(propertyValue, firstArg);
+                    int result = accessor.getComparator(propertyName).compare(propertyValue, firstArg);
                     return checkComparatorResult(operator, result);
                 };
             case RqlParser.CONTAINS:
@@ -120,41 +119,6 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
         }
     }
 
-    protected Comparator<Object> getComparator(String propertyName) {
-        return DefaultComparator.INSTANCE;
-    }
-
-    protected Comparator<T> getSortComparator(String property) {
-        Comparator<Object> propertyComparator = getComparator(property);
-        return (a, b) -> {
-            Object valueA = accessor.getProperty(a, property);
-            Object valueB = accessor.getProperty(b, property);
-            return propertyComparator.compare(valueA, valueB);
-        };
-    }
-
-    private static class DefaultComparator implements Comparator<Object> {
-        public static final DefaultComparator INSTANCE = new DefaultComparator();
-
-        @Override
-        public int compare(Object a, Object b) {
-            if (a == b) {
-                return 0;
-            } else if (a == null) {
-                return -1;
-            } else if (b == null) {
-                return 1;
-            } else if (a instanceof Comparable) {
-                try {
-                    //noinspection unchecked,rawtypes
-                    return ((Comparable) a).compareTo(b);
-                } catch (ClassCastException e) {
-                    // ignore
-                }
-            }
-            return String.valueOf(a).compareTo(String.valueOf(b));
-        }
-    }
 
     private List<Predicate<T>> childPredicates(List<ExpressionContext> arguments) {
         return arguments.stream()
