@@ -25,9 +25,11 @@ grammar Rql;
  * TODO unreserved chars * and + should be encoded in query parts..?
  * TODO + should be decoded as a space
  * TODO define wildcard character? do we encode star symbol?
+ * TODO match operator?
  * TODO define list of characters that should be encoded and where
  * TODO define list of characters that should be decoded and where
  * TODO null values? true/false/null/number/string tokens?
+ * TODO Way to convert to ASTNode for compatibility
 */
 
 query

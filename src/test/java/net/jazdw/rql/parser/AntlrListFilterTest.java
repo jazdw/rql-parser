@@ -39,18 +39,7 @@ import net.jazdw.rql.visitor.QueryVisitor;
  * @author Jared Wiltshire
  */
 public class AntlrListFilterTest {
-    static class ParserShim {
-        public RqlParser parse(String rql) {
-            CharStream inputStream = CharStreams.fromString(rql);
-            RqlLexer lexer = new RqlLexer(inputStream);
-            CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-            RqlParser parser = new RqlParser(tokenStream);
-            parser.setErrorHandler(new BailErrorStrategy());
-            return parser;
-        }
-    }
 
-    ParserShim parser;
     QueryVisitor<Person> filter;
 
     static final Person HARRY_SMITH = new Person("Harry", "Smith", LocalDate.of(1954, 3, 18), "Male", "English");
@@ -90,8 +79,16 @@ public class AntlrListFilterTest {
 
     @Before
     public void before() {
-        parser = new ParserShim();
         filter = new QueryVisitor<>(this::getProperty);
+    }
+
+    private RqlParser createParser(String rql) {
+        CharStream inputStream = CharStreams.fromString(rql);
+        RqlLexer lexer = new RqlLexer(inputStream);
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        RqlParser parser = new RqlParser(tokenStream);
+        parser.setErrorHandler(new BailErrorStrategy());
+        return parser;
     }
 
     /**
@@ -109,24 +106,24 @@ public class AntlrListFilterTest {
 
     @Test
     public void testBasicAnd() {
-        RqlParser node = parser.parse("firstName=Shazza&lastName=Smith");
-        List<Person> results = filter.visit(node.query()).applyList(PEOPLE);
+        RqlParser parser = createParser("firstName=Shazza&lastName=Smith");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(SHAZZA_SMITH, results.get(0));
     }
 
     @Test
     public void testAnd() {
-        RqlParser node = parser.parse("firstName=Shazza&age>50");
-        List<Person> results = filter.visit(node.query()).applyList(PEOPLE);
+        RqlParser parser = createParser("firstName=Shazza&age>50");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(SHAZZA_SMITH, results.get(0));
     }
 
     @Test
     public void testOr() {
-        RqlParser node = parser.parse("nationality=Spanish|dateOfBirth>=date:2000-01-01");
-        List<Person> results = filter.visit(node.query()).applyList(PEOPLE);
+        RqlParser parser = createParser("nationality=Spanish|dateOfBirth>=date:2000-01-01");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(6, results.size());
         for (Person p : results) {
             assertTrue(p.getNationality().equals("Spanish") || p.getDateOfBirth().compareTo(LocalDate.of(2000, 1, 1)) >= 0);
@@ -135,8 +132,8 @@ public class AntlrListFilterTest {
 
     @Test
     public void testAndOr() {
-        RqlParser node = parser.parse("(nationality=English|lastName=Smith)&age>20");
-        List<Person> results = filter.visit(node.query()).applyList(PEOPLE);
+        RqlParser parser = createParser("(nationality=English|lastName=Smith)&age>20");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(3, results.size());
         for (Person p : results) {
             assertTrue((p.getNationality().equals("English") || p.getLastName().equals("Smith")) && p.getAge() > 20);
@@ -145,43 +142,43 @@ public class AntlrListFilterTest {
 
     @Test
     public void testMatch() {
-        RqlParser node = parser.parse("firstName=like=*azza");
-        List<Person> results = filter.visit(node.query()).applyList(PEOPLE);
+        RqlParser parser = createParser("firstName=like=*azza");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(3, results.size());
         for (Person p : results) {
             assertEquals("Australian", p.getNationality());
         }
 
-        node = parser.parse("match(firstName,m*)");
-        results = filter.visit(node.query()).applyList(PEOPLE);
+        parser = createParser("match(firstName,m*)");
+        results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(3, results.size());
         for (Person p : results) {
             assertTrue(p.getFirstName().startsWith("M"));
         }
 
-        node = parser.parse("lastName=match=*Ñ*");
-        results = filter.visit(node.query()).applyList(PEOPLE);
+        parser = createParser("lastName=match=*Ñ*");
+        results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(MANUEL_MUNOZ, results.get(0));
     }
 
     @Test
     public void testUTFEncoding() {
-        RqlParser node = parser.parse("firstName=Jos%C3%A9|lastName=Rodr%C3%ADguez");
-        List<Person> results = filter.visit(node.query()).applyList(PEOPLE);
+        RqlParser parser = createParser("firstName=Jos%C3%A9|lastName=Rodr%C3%ADguez");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(JOSE_RODRIGUEZ, results.get(0));
     }
 
     @Test
     public void testSort() {
-        RqlParser node = parser.parse("sort(-firstName)");
-        List<Person> results = filter.visit(node.query()).applyList(PEOPLE);
+        RqlParser parser = createParser("sort(-firstName)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(PEOPLE.size(), results.size());
         assertEquals("Shazza", results.get(0).getFirstName());
 
-        node = parser.parse("sort(+lastName,-firstName)");
-        results = filter.visit(node.query()).applyList(PEOPLE);
+        parser = createParser("sort(+lastName,-firstName)");
+        results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(PEOPLE.size(), results.size());
         assertEquals(BILLY_BROWN, results.get(0));
         assertEquals(DAZZA_WILLIAMS, results.get(15));
@@ -189,19 +186,29 @@ public class AntlrListFilterTest {
 
     @Test
     public void testLimit() {
-        RqlParser node = parser.parse("limit(10)");
-        List<Person> results = filter.visit(node.query()).applyList(PEOPLE);
+        RqlParser parser = createParser("limit(10)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(10, results.size());
 
-        node = parser.parse("limit(5,9)");
-        results = filter.visit(node.query()).applyList(PEOPLE);
+        parser = createParser("limit(5,9)");
+        results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(5, results.size());
         assertEquals(JOSE_RODRIGUEZ, results.get(0));
 
         // test for IndexOutOfBoundsException
-        node = parser.parse("limit(10,15)");
-        results = filter.visit(node.query()).applyList(PEOPLE);
+        parser = createParser("limit(10,15)");
+        results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(JAYDEN_DAVIS, results.get(0));
+    }
+
+    @Test
+    public void testIn() {
+        RqlParser parser = createParser("firstName=in=(Shazza,Dazza)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(3, results.size());
+        assertTrue(results.contains(DAZZA_WILLIAMS));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
     }
 }
