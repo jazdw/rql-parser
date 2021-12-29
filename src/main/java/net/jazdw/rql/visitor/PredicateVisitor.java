@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.Token;
@@ -92,6 +93,23 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
                     Object propertyValue = accessor.getProperty(item, propertyName);
                     int result = accessor.getComparator(propertyName).compare(propertyValue, firstArg);
                     return checkComparatorResult(operator, result);
+                };
+            case RqlParser.MATCH:
+                return (item) -> {
+                    Object propertyValue = accessor.getProperty(item, propertyName);
+                    if (propertyValue instanceof String) {
+                        String valueString = (String) propertyValue;
+                        if (firstArg instanceof Pattern) {
+                            Pattern regex = (Pattern) firstArg;
+                            return regex.matcher(valueString).matches();
+                        } else if (firstArg instanceof String) {
+                            String regex = (String) firstArg;
+                            Pattern pattern = Pattern.compile(regex.replace("*", ".*"),
+                                    Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+                            return pattern.matcher(valueString).matches();
+                        }
+                    }
+                    return false;
                 };
             case RqlParser.CONTAINS:
                 return (item) -> {
