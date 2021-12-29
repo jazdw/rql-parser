@@ -21,50 +21,54 @@ import java.util.regex.Pattern;
 
 import net.jazdw.rql.converter.Converter;
 import net.jazdw.rql.converter.ConverterException;
+import net.jazdw.rql.converter.ValueConverter;
+import net.jazdw.rql.util.DefaultTextDecoder;
+import net.jazdw.rql.util.TextDecoder;
 
 /**
  * Resource Query Language (RQL) Parser
- * 
+ *
  * <p>Parses RQL encoded query strings and returns a tree of Abstract Syntax Tree
  * (AST) nodes. These nodes can then be visited using a visitor pattern to produce
  * a SQL query for example.</p>
- * 
+ *
  * <p>
- * The RQL language is defined by Dojo Foundation's Persevere project - 
+ * The RQL language is defined by Dojo Foundation's Persevere project -
  * <a href="https://github.com/persvr/rql">https://github.com/persvr/rql</a>
  * </p>
- * 
+ *
  * @author Jared Wiltshire
  */
 public class RQLParser {
     // these patterns are straight from the Persevere Javascript parser
     // with the backslashes escaped and broken down into parts and the
     // +*$-:\w%._ character set replaced with an inverted reserved set
-    
+
     // reserved characters that we parse against, these should be percent escaped
     // note that comma is also reserved except inside brackets
     private static final String RESERVED = "&|()=<>";
-    
+
     private static final String PROPERTY_OR_VALUE =
             String.format("\\([^%s]+\\)|[^%1$s,]*|", RESERVED);
     private static final String COMPARISON_OPERATOR = "[<>!]?=(?:[\\w]*=)?|>|<";
-    
+
     private static final String CLOSE_BRACKET = "\\)";
     private static final String DELIMITERS = "[&\\|,]";
     private static final String OPEN_BRACKET = "\\(";
-    
+
     private static final Pattern SLASHED_PATTERN = Pattern.compile(
             "[\\+\\*\\$\\-:\\w%\\._]*\\/[\\+\\*\\$\\-:\\w%\\._\\/]*");
-    
+
     private static final Pattern NORMALIZE_PATTERN = Pattern.compile(
             String.format("(%s)(%s)(%1$s)",
                     PROPERTY_OR_VALUE, COMPARISON_OPERATOR));
-    
+
     private static final Pattern NODE_CREATE_PATTERN = Pattern.compile(
             String.format("(%s)|(%s)?([^%s,]*)(%s?)",
                     CLOSE_BRACKET, DELIMITERS, RESERVED, OPEN_BRACKET));
-    
+
     private static final Map<String, String> operatorMap = new HashMap<String, String>();
+
     static {
         operatorMap.put("=", "eq");
         operatorMap.put("==", "eq");
@@ -75,26 +79,27 @@ public class RQLParser {
         operatorMap.put("!=", "ne");
     }
 
-    private Converter converter;
-    
+    private final ValueConverter<Object> converter;
+    private final TextDecoder decoder = new DefaultTextDecoder();
+
     public RQLParser() {
         this(new Converter());
     }
-    
-    public RQLParser(Converter converter) {
+
+    public RQLParser(ValueConverter<Object> converter) {
         this.converter = converter;
     }
-    
+
     public <R> R parse(String query, SimpleASTVisitor<R> visitor) throws RQLParserException {
         ASTNode node = parse(query);
         return node.accept(visitor);
     }
-    
+
     public <R, A> R parse(String query, ASTVisitor<R, A> visitor, A param) throws RQLParserException {
         ASTNode node = parse(query);
         return node.accept(visitor, param);
     }
-    
+
     public ASTNode parse(String query) throws RQLParserException {
         if (query == null) {
             throw new IllegalArgumentException("query must not be null");
@@ -104,7 +109,7 @@ public class RQLParser {
         }
 
         Matcher matcher;
-        
+
         // find slash delimited array patterns and convert to comma delimited with brackets
         // e.g. quick/brown/fox  ==>  (quick,brown,fox)
         if (query.contains("/")) {
@@ -115,7 +120,7 @@ public class RQLParser {
                 }
             }.replace();
         }
-        
+
         // convert simplified, "syntaxic sugar" comparison operators to normalized call syntax
         // e.g. name=john  ==>  eq(name,john)
         matcher = NORMALIZE_PATTERN.matcher(query);
@@ -124,19 +129,18 @@ public class RQLParser {
                 String property = matcher.group(1);
                 String operator = matcher.group(2);
                 String value = matcher.group(3);
-                
+
                 if (property.isEmpty()) {
                     throw new RQLParserException("No property specified for operator '" + operator + "' at position " + matcher.start());
                 }
-                
+
                 if (operator.length() < 3) {
                     String mapped = operatorMap.get(operator);
                     if (mapped == null) {
                         throw new RQLParserException("Illegal operator " + operator);
                     }
                     operator = mapped;
-                }
-                else {
+                } else {
                     operator = operator.substring(1, operator.length() - 1);
                 }
                 return operator + '(' + property + "," + value + ")";
@@ -145,20 +149,20 @@ public class RQLParser {
 
         // create a root node with an empty name
         final ASTNode rootNode = new ASTNode("");
-        
+
         // this replacer basically iteratively matches brackets and operators and replaces them
         // with an empty string, the result is then checked later for left over characters which
         // indicate a parsing error
         matcher = NODE_CREATE_PATTERN.matcher(query);
         String leftoverCharacters = new RegexReplacer(matcher) {
             ASTNode node = rootNode;
-            
+
             public String replaceWith() {
                 String closeBracket = matcher.group(1);
                 String delimiter = matcher.group(2);
                 String propertyOrValue = matcher.group(3);
                 String openBracket = matcher.group(4);
-                
+
                 if (delimiter != null) {
                     if (delimiter.equals("&")) {
                         setConjunction(node, "and");
@@ -175,8 +179,7 @@ public class RQLParser {
                         topTerm.cache[term.name] = term.args;
                     }
                     */
-                }
-                else if (closeBracket != null && !closeBracket.isEmpty()) {
+                } else if (closeBracket != null && !closeBracket.isEmpty()) {
                     if (node == null) {
                         throw new RQLParserException("Closing paranthesis without an opening paranthesis");
                     }
@@ -188,15 +191,24 @@ public class RQLParser {
                         Object last = node.removeLastArgument();
                         if (last instanceof ASTNode) {
                             node.addArgument(((ASTNode) last).getArguments());
-                        }
-                        else {
+                        } else {
                             throw new RQLParserException("Argument not ASTNode");
                         }
                     }
-                }
-                else if (propertyOrValue != null && !propertyOrValue.isEmpty() || ",".equals(delimiter)) {
+                } else if (propertyOrValue != null && !propertyOrValue.isEmpty() || ",".equals(delimiter)) {
                     try {
-                        node.addArgument(converter.convert(propertyOrValue));
+                        Object objectValue;
+                        int pos = propertyOrValue.indexOf(":");
+                        if (pos >= 0) {
+                            String type = decoder.apply(propertyOrValue.substring(0, pos));
+                            String textValue = decoder.apply(propertyOrValue.length() > pos + 1 ? propertyOrValue.substring(pos + 1) : "");
+                            objectValue = converter.convert(type, textValue);
+                        } else {
+                            String textValue = decoder.apply(propertyOrValue);
+                            objectValue = converter.convert(textValue);
+                        }
+
+                        node.addArgument(objectValue);
                     } catch (ConverterException e) {
                         throw new RQLParserException(e);
                     }
@@ -214,23 +226,23 @@ public class RQLParser {
                     }
                      */
                 }
-                
+
                 return "";
             }
         }.replace();
-        
+
         if (!rootNode.isRootNode()) {
             throw new RQLParserException("Opening paranthesis without a closing paranthesis");
         }
-        
+
         if (leftoverCharacters.length() > 0) {
             // any extra characters left over from the replace indicates invalid syntax
             throw new RQLParserException("Illegal character in query string encountered " + leftoverCharacters);
         }
-        
+
         // remove parents from each node in the tree
         rootNode.removeParents();
-        
+
         // no root level conjunction i.e. just a single conditional statement or function
         if (!rootNode.isNameValid() && rootNode.getArgumentsSize() == 1) {
             Object arg = rootNode.getArgument(0);
@@ -238,15 +250,14 @@ public class RQLParser {
                 return (ASTNode) arg;
             }
         }
-        
+
         return rootNode;
     }
-    
+
     private void setConjunction(ASTNode node, String operator) {
         if (!node.isNameValid()) {
             node.setName(operator);
-        }
-        else if (!node.getName().equals(operator)) {
+        } else if (!node.getName().equals(operator)) {
             throw new RQLParserException("Can not mix conjunctions within a group, use paranthesis around each set of same conjuctions (& and |)");
         }
     }
