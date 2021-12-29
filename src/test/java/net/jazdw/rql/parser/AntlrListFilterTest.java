@@ -155,7 +155,7 @@ public class AntlrListFilterTest {
 
     @Test
     public void testAnd() {
-        RqlParser parser = createParser("firstName=Shazza&age=gt=50");
+        RqlParser parser = createParser("firstName=Shazza&dateOfBirth=lt=date:1980-01-01");
         List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(SHAZZA_SMITH, results.get(0));
@@ -173,11 +173,12 @@ public class AntlrListFilterTest {
 
     @Test
     public void testAndOr() {
-        RqlParser parser = createParser("(nationality=English|lastName=Smith)&age=gt=20");
+        RqlParser parser = createParser("(nationality=English|lastName=Smith)&dateOfBirth=lt=date:2001-01-01");
         List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(3, results.size());
         for (Person p : results) {
-            assertTrue((p.getNationality().equals("English") || p.getLastName().equals("Smith")) && p.getAge() > 20);
+            assertTrue((p.getNationality().equals("English") || p.getLastName().equals("Smith")) &&
+                    p.getDateOfBirth().isBefore(LocalDate.of(2001, 1, 1)));
         }
     }
 
