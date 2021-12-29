@@ -164,4 +164,14 @@ public class ListFilterTest {
         assertEquals(1, results.size());
         assertEquals(JAYDEN_DAVIS, results.get(0));
     }
+
+    @Test
+    public void testIn() {
+        ASTNode node = parser.parse("firstName=in=(Shazza,Dazza)");
+        List<Person> results = node.accept(filter, people);
+        assertEquals(3, results.size());
+        assertTrue(results.contains(DAZZA_WILLIAMS));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
+    }
 }

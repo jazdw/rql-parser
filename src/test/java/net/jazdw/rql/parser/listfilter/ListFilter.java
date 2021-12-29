@@ -38,7 +38,7 @@ public class ListFilter<T> implements ASTVisitor<List<T>, List<T>> {
     @Override
     public List<T> visit(ASTNode node, List<T> list) {
         switch (node.getName()) {
-            case "and":
+            case "and": {
                 for (Object obj : node) {
                     if (obj instanceof ASTNode) {
                         list = ((ASTNode) obj).accept(this, list);
@@ -47,7 +47,8 @@ public class ListFilter<T> implements ASTVisitor<List<T>, List<T>> {
                     }
                 }
                 return list;
-            case "or":
+            }
+            case "or": {
                 Set<T> set = new LinkedHashSet<>();
                 for (Object obj : node) {
                     if (obj instanceof ASTNode) {
@@ -57,12 +58,13 @@ public class ListFilter<T> implements ASTVisitor<List<T>, List<T>> {
                     }
                 }
                 return new ArrayList<>(set);
+            }
             case "eq":
             case "gt":
             case "ge":
             case "lt":
             case "le":
-            case "ne":
+            case "ne": {
                 String propName = (String) node.getArgument(0);
                 Object test = node.getArgumentsSize() > 1 ? node.getArgument(1) : null;
 
@@ -91,14 +93,28 @@ public class ListFilter<T> implements ASTVisitor<List<T>, List<T>> {
                     }
                 }
                 return result;
+            }
+            case "in": {
+                String propName = (String) node.getArgument(0);
+                List<?> values = (List<?>) node.getArgument(1);
+
+                List<T> result = new ArrayList<>();
+                for (T item : list) {
+                    Object propertyValues = getProperty(item, propName);
+                    if (values.contains(propertyValues)) {
+                        result.add(item);
+                    }
+                }
+                return result;
+            }
             case "like":
-            case "match":
-                propName = (String) node.getArgument(0);
+            case "match": {
+                String propName = (String) node.getArgument(0);
                 String matchString = (String) node.getArgument(1);
                 Pattern matchPattern = Pattern.compile(matchString.replace("*", ".*"),
                         Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
-                result = new ArrayList<>();
+                List<T> result = new ArrayList<>();
 
                 for (T item : list) {
                     Object property = getProperty(item, propName);
@@ -115,7 +131,8 @@ public class ListFilter<T> implements ASTVisitor<List<T>, List<T>> {
                     }
                 }
                 return result;
-            case "limit":
+            }
+            case "limit": {
                 int limit = (int) node.getArgument(0);
                 int offset = node.getArgumentsSize() > 1 ? (int) node.getArgument(1) : 0;
 
@@ -129,7 +146,8 @@ public class ListFilter<T> implements ASTVisitor<List<T>, List<T>> {
                 }
 
                 return list.subList(offset, toIndex);
-            case "sort":
+            }
+            case "sort": {
                 Comparator<T> comparator = null;
                 for (Object obj : node) {
                     String sortOption = (String) obj;
@@ -148,6 +166,7 @@ public class ListFilter<T> implements ASTVisitor<List<T>, List<T>> {
                     list.sort(comparator);
                 }
                 return list;
+            }
             default:
                 throw new UnsupportedOperationException(String.format("Encountered unknown operator '%s'", node.getName()));
         }
