@@ -30,6 +30,7 @@ grammar Rql;
  * TODO define list of characters that should be decoded and where
  * TODO null values? true/false/null/number/string tokens?
  * TODO Way to convert to ASTNode for compatibility
+ * TODO throw exception if unexpected expression encounted in predicates / rework grammar
 */
 
 query

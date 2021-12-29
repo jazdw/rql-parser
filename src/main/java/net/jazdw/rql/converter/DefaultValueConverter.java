@@ -36,7 +36,7 @@ import org.apache.commons.lang3.math.NumberUtils;
  * @author Jared Wiltshire
  * @see #convert(String)
  */
-public class Converter implements ValueConverter<Object> {
+public class DefaultValueConverter implements ValueConverter<Object> {
     /**
      * The default type to value converter map
      */
@@ -56,7 +56,7 @@ public class Converter implements ValueConverter<Object> {
     /**
      * Creates a new converter using the auto value converter as default
      */
-    public Converter() {
+    public DefaultValueConverter() {
         this(new AutoValueConverter(), CONVERTERS);
     }
 
@@ -65,7 +65,7 @@ public class Converter implements ValueConverter<Object> {
      *
      * @param defaultConverter the default value converter
      */
-    public Converter(ValueConverter<?> defaultConverter) {
+    public DefaultValueConverter(ValueConverter<?> defaultConverter) {
         this(defaultConverter, CONVERTERS);
     }
 
@@ -74,7 +74,7 @@ public class Converter implements ValueConverter<Object> {
      *
      * @param converterMap auto conversion map, maps types e.g. 'date' to a value converter
      */
-    public Converter(Map<String, ValueConverter<?>> converterMap) {
+    public DefaultValueConverter(Map<String, ValueConverter<?>> converterMap) {
         this(new AutoValueConverter(), converterMap);
     }
 
@@ -84,7 +84,7 @@ public class Converter implements ValueConverter<Object> {
      * @param defaultConverter the default value converter
      * @param converterMap     auto conversion map, maps types e.g. 'date' to a value converter
      */
-    public Converter(ValueConverter<?> defaultConverter, Map<String, ValueConverter<?>> converterMap) {
+    public DefaultValueConverter(ValueConverter<?> defaultConverter, Map<String, ValueConverter<?>> converterMap) {
         this.defaultConverter = defaultConverter;
         this.converterMap = new HashMap<>(converterMap);
     }
@@ -101,7 +101,7 @@ public class Converter implements ValueConverter<Object> {
     }
 
     /**
-     * Converter for numbers, can return integers, floats, {@link BigDecimal} etc.
+     * DefaultValueConverter for numbers, can return integers, floats, {@link BigDecimal} etc.
      * Note: an integer starting with 0 is interpreted as octal
      */
     public static class NumberConverter implements ValueConverter<Number> {
@@ -123,7 +123,7 @@ public class Converter implements ValueConverter<Object> {
     }
 
     /**
-     * Converter for epoch millisecond timestamps
+     * DefaultValueConverter for epoch millisecond timestamps
      */
     public static class EpochTimestampConverter implements ValueConverter<Instant> {
 
@@ -143,7 +143,7 @@ public class Converter implements ValueConverter<Object> {
     }
 
     /**
-     * Converter for ISO 8601 formatted date-time with a zone/offset.
+     * DefaultValueConverter for ISO 8601 formatted date-time with a zone/offset.
      */
     public static class ZonedDateTimeConverter implements ValueConverter<ZonedDateTime> {
 
@@ -163,7 +163,7 @@ public class Converter implements ValueConverter<Object> {
     }
 
     /**
-     * Converter for ISO 8601 formatted local date-time, no zone or offset is specified.
+     * DefaultValueConverter for ISO 8601 formatted local date-time, no zone or offset is specified.
      */
     public static class LocalDateTimeConverter implements ValueConverter<LocalDateTime> {
 
@@ -183,7 +183,7 @@ public class Converter implements ValueConverter<Object> {
     }
 
     /**
-     * Converter for ISO 8601 formatted local date (with no time), no zone or offset is specified.
+     * DefaultValueConverter for ISO 8601 formatted local date (with no time), no zone or offset is specified.
      */
     public static class LocalDateConverter implements ValueConverter<LocalDate> {
 
@@ -226,7 +226,7 @@ public class Converter implements ValueConverter<Object> {
     }
 
     /**
-     * Converter for booleans, case-insensitive.
+     * DefaultValueConverter for booleans, case-insensitive.
      */
     public static class BooleanConverter implements ValueConverter<Boolean> {
 

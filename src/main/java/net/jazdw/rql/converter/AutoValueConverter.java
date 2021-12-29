@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import net.jazdw.rql.converter.Converter.GenericDateTimeConverter;
-import net.jazdw.rql.converter.Converter.NumberConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.GenericDateTimeConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.NumberConverter;
 
 /**
  * The default value converter which tries to guess the value type and convert it to

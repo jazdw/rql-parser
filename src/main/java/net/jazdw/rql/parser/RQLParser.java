@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.jazdw.rql.converter.Converter;
 import net.jazdw.rql.converter.ConverterException;
+import net.jazdw.rql.converter.DefaultValueConverter;
 import net.jazdw.rql.converter.ValueConverter;
 import net.jazdw.rql.util.DefaultTextDecoder;
 import net.jazdw.rql.util.TextDecoder;
@@ -83,7 +83,7 @@ public class RQLParser {
     private final TextDecoder decoder = new DefaultTextDecoder();
 
     public RQLParser() {
-        this(new Converter());
+        this(new DefaultValueConverter());
     }
 
     public RQLParser(ValueConverter<Object> converter) {

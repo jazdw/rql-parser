@@ -10,9 +10,6 @@ import net.jazdw.rql.RqlBaseVisitor;
 import net.jazdw.rql.RqlParser.AndContext;
 import net.jazdw.rql.RqlParser.EqualsContext;
 import net.jazdw.rql.RqlParser.ExpressionContext;
-import net.jazdw.rql.converter.Converter;
-import net.jazdw.rql.converter.ValueConverter;
-import net.jazdw.rql.util.DefaultTextDecoder;
 import net.jazdw.rql.util.PropertyAccessor;
 import net.jazdw.rql.util.TextDecoder;
 
@@ -22,12 +19,8 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
     private final PropertyAccessor<T, Object> accessor;
     private final TextDecoder decoder;
 
-    public PredicateVisitor(PropertyAccessor<T, Object> accessor) {
-        this(accessor, new Converter(), new DefaultTextDecoder());
-    }
-
-    public PredicateVisitor(PropertyAccessor<T, Object> accessor, ValueConverter<Object> converter, TextDecoder decoder) {
-        this.valueVisitor = new ValueVisitor(decoder, converter);
+    public PredicateVisitor(TextDecoder decoder, ValueVisitor valueVisitor, PropertyAccessor<T, Object> accessor) {
+        this.valueVisitor = valueVisitor;
         this.accessor = accessor;
         this.decoder = decoder;
     }
