@@ -155,7 +155,7 @@ public class AntlrListFilterTest {
 
     @Test
     public void testAnd() {
-        RqlParser parser = createParser("firstName=Shazza&age>50");
+        RqlParser parser = createParser("firstName=Shazza&age=gt=50");
         List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(SHAZZA_SMITH, results.get(0));
@@ -163,7 +163,7 @@ public class AntlrListFilterTest {
 
     @Test
     public void testOr() {
-        RqlParser parser = createParser("nationality=Spanish|dateOfBirth>=date:2000-01-01");
+        RqlParser parser = createParser("nationality=Spanish|dateOfBirth=ge=date:2000-01-01");
         List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(6, results.size());
         for (Person p : results) {
@@ -173,7 +173,7 @@ public class AntlrListFilterTest {
 
     @Test
     public void testAndOr() {
-        RqlParser parser = createParser("(nationality=English|lastName=Smith)&age>20");
+        RqlParser parser = createParser("(nationality=English|lastName=Smith)&age=gt=20");
         List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(3, results.size());
         for (Person p : results) {
@@ -249,6 +249,35 @@ public class AntlrListFilterTest {
         List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(3, results.size());
         assertTrue(results.contains(DAZZA_WILLIAMS));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
+    }
+
+    @Test
+    public void testInForm2() {
+        RqlParser parser = createParser("in(firstName,(Shazza,Dazza))");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(3, results.size());
+        assertTrue(results.contains(DAZZA_WILLIAMS));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
+    }
+
+    @Test
+    public void testInForm3() {
+        RqlParser parser = createParser("in(firstName,Shazza,Dazza)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(3, results.size());
+        assertTrue(results.contains(DAZZA_WILLIAMS));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
+    }
+
+    @Test
+    public void testContains() {
+        RqlParser parser = createParser("names=contains=Shazza");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(2, results.size());
         assertTrue(results.contains(SHAZZA_TAYLOR));
         assertTrue(results.contains(SHAZZA_SMITH));
     }

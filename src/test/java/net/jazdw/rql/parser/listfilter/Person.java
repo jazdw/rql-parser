@@ -17,6 +17,7 @@ package net.jazdw.rql.parser.listfilter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -84,6 +85,10 @@ public class Person {
 
     public void setNationality(String nationality) {
         this.nationality = nationality;
+    }
+
+    public List<String> getNames() {
+        return List.of(firstName, lastName);
     }
 
     @Override
