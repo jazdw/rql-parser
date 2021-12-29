@@ -100,7 +100,9 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
                     pattern = (Pattern) firstArg;
                 } else if (firstArg instanceof String) {
                     String regex = (String) firstArg;
-                    pattern = Pattern.compile(regex.replace("*", ".*"),
+                    pattern = Pattern.compile(regex
+                                    .replace("*", ".*")
+                                    .replace("?", "."),
                             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
                 } else {
                     throw new IllegalStateException("Must be pattern or regex");

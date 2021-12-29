@@ -197,11 +197,41 @@ public class AntlrListFilterTest {
         for (Person p : results) {
             assertTrue(p.getFirstName().startsWith("M"));
         }
+    }
 
-        parser = createParser("lastName=match=*%C3%91*");
-        results = filter.visit(parser.query()).applyList(PEOPLE);
+    @Test
+    public void testMatchSingleChar() {
+        RqlParser parser = createParser("match(firstName,%3Fazza)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(1, results.size());
+        assertEquals(DAZZA_WILLIAMS, results.get(0));
+    }
+
+    @Test
+    public void testMatchUnicode() {
+        RqlParser parser = createParser("lastName=match=*%C3%91*");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(MANUEL_MUNOZ, results.get(0));
+    }
+
+    @Test
+    public void testMatchRegex() {
+        RqlParser parser = createParser("match(firstName,re:m.*l)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(1, results.size());
+        assertTrue(results.contains(MANUEL_MUNOZ));
+    }
+
+    @Test
+    public void testMatchRegexCaseSensitive() {
+        RqlParser parser = createParser("match(firstName,RE:m.*)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(0, results.size());
+
+        parser = createParser("match(firstName,RE:M.*)");
+        results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(3, results.size());
     }
 
     @Test
