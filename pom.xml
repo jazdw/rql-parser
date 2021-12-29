@@ -55,12 +55,14 @@
                         <goals>
                             <goal>antlr4</goal>
                         </goals>
-<!--                        <configuration>-->
+                        <configuration>
+                            <visitor>true</visitor>
+                            <listener>true</listener>
 <!--                            <arguments>-->
 <!--                                <argument>-package</argument>-->
 <!--                                <argument>net.jazdw.rql</argument>-->
 <!--                            </arguments>-->
-<!--                        </configuration>-->
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

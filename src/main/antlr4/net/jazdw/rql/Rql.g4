@@ -40,12 +40,12 @@ expression
     | expression AMPERSAND expression #and
     | expression VERTICAL_BAR expression #or
     | PREDICATE OPEN_PARENTHESIS identifier COMMA value (COMMA value)* CLOSE_PARENTHESIS #predicate
-    | function_name OPEN_PARENTHESIS value? (COMMA value)* CLOSE_PARENTHESIS #function
+    | functionName OPEN_PARENTHESIS value? (COMMA value)* CLOSE_PARENTHESIS #function
     | identifier EQUALS_SIGN PREDICATE EQUALS_SIGN value #predicate
     | identifier EQUALS_SIGN value #equals
     ;
 
-function_name
+functionName
     : TEXT
     ;
 
@@ -55,15 +55,15 @@ identifier
 
 value
     : TEXT
-    | typed_value
-    | array_value
+    | typedValue
+    | arrayValue
     ;
 
-typed_value
+typedValue
     : TEXT COLON TEXT
     ;
 
-array_value
+arrayValue
     : OPEN_PARENTHESIS value? (COMMA value)* CLOSE_PARENTHESIS
     ;
 
