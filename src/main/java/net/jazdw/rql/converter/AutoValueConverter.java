@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jared Wiltshire (https://jazdw.net).
+ * Copyright (C) 2021 Jared Wiltshire (https://jazdw.net).
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Lesser General Public License
@@ -36,6 +36,8 @@ class AutoValueConverter implements ValueConverter<Object> {
      * The default automatic conversion map
      */
     public static final Map<String, Object> DEFAULT_CONVERSIONS;
+    // detects ISO 8601 dates with a minimum of year, month and day specified
+    private static final Pattern DATE_PATTERN = Pattern.compile("^[0-9]{4}-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])(T(2[0-3]|[01][0-9])(:[0-5][0-9])?(:[0-5][0-9])?(\\.[0-9][0-9]?[0-9]?)?(Z|[+-](?:2[0-3]|[01][0-9])(?::?(?:[0-5][0-9]))?)?)?$");
 
     static {
         Map<String, Object> defaultConversions = new HashMap<>();
@@ -46,9 +48,6 @@ class AutoValueConverter implements ValueConverter<Object> {
         defaultConversions.put("-Infinity", Double.NEGATIVE_INFINITY);
         DEFAULT_CONVERSIONS = Collections.unmodifiableMap(defaultConversions);
     }
-
-    // detects ISO 8601 dates with a minimum of year, month and day specified
-    private static final Pattern DATE_PATTERN = Pattern.compile("^[0-9]{4}-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])(T(2[0-3]|[01][0-9])(:[0-5][0-9])?(:[0-5][0-9])?(\\.[0-9][0-9]?[0-9]?)?(Z|[+-](?:2[0-3]|[01][0-9])(?::?(?:[0-5][0-9]))?)?)?$");
 
     private final Map<String, Object> conversions;
 

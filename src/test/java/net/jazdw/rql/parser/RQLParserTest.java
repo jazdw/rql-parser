@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jared Wiltshire (https://jazdw.net).
+ * Copyright (C) 2021 Jared Wiltshire (https://jazdw.net).
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Lesser General Public License
@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -29,7 +28,6 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**

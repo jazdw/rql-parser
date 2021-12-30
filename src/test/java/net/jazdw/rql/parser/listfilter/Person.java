@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jared Wiltshire (https://jazdw.net).
+ * Copyright (C) 2021 Jared Wiltshire (https://jazdw.net).
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Lesser General Public License
@@ -25,6 +25,12 @@ import java.util.Objects;
  */
 public class Person {
 
+    private String firstName;
+    private String lastName;
+    private LocalDate dateOfBirth;
+    private String gender;
+    private String nationality;
+
     public Person() {
 
     }
@@ -36,12 +42,6 @@ public class Person {
         this.gender = gender;
         this.nationality = nationality;
     }
-
-    private String firstName;
-    private String lastName;
-    private LocalDate dateOfBirth;
-    private String gender;
-    private String nationality;
 
     public String getFirstName() {
         return firstName;

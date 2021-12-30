@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jared Wiltshire (https://jazdw.net).
+ * Copyright (C) 2021 Jared Wiltshire (https://jazdw.net).
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Lesser General Public License
@@ -41,8 +41,6 @@ import net.jazdw.rql.visitor.QueryVisitor;
  */
 public class AntlrListFilterTest {
 
-    QueryVisitor<Person> filter;
-
     static final Person HARRY_SMITH = new Person("Harry", "Smith", LocalDate.of(1954, 3, 18), "Male", "English");
     static final Person JILL_SMITH = new Person("Jill", "Smith", LocalDate.of(2001, 1, 16), "Female", "English");
     static final Person OLIVER_SMITH = new Person("Oliver", "Smith", LocalDate.of(1930, 2, 12), "Male", "English");
@@ -59,7 +57,6 @@ public class AntlrListFilterTest {
     static final Person BETTY_BROWN = new Person("Betty", "Brown", LocalDate.of(1985, 7, 10), "Female", "American");
     static final Person MADISON_MILLER = new Person("Madison", "Miller", LocalDate.of(1972, 3, 28), "Female", "American");
     static final Person JAYDEN_DAVIS = new Person("Jayden", "Davis", LocalDate.of(2005, 12, 23), "Male", "American");
-
     static final List<Person> PEOPLE = List.of(
             HARRY_SMITH,
             JILL_SMITH,
@@ -77,6 +74,7 @@ public class AntlrListFilterTest {
             BETTY_BROWN,
             MADISON_MILLER,
             JAYDEN_DAVIS);
+    QueryVisitor<Person> filter;
 
     @Before
     public void before() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jared Wiltshire (https://jazdw.net).
+ * Copyright (C) 2021 Jared Wiltshire (https://jazdw.net).
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Lesser General Public License
@@ -18,5 +18,5 @@ package net.jazdw.rql.parser;
  * @author Jared Wiltshire
  */
 public interface SimpleASTVisitor<R> {
-    public R visit(ASTNode node);
+    R visit(ASTNode node);
 }
