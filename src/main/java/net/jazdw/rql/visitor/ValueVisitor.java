@@ -6,13 +6,19 @@ import net.jazdw.rql.RqlBaseVisitor;
 import net.jazdw.rql.RqlParser.ArrayValueContext;
 import net.jazdw.rql.RqlParser.TypedValueContext;
 import net.jazdw.rql.RqlParser.ValueContext;
+import net.jazdw.rql.converter.DefaultValueConverter;
 import net.jazdw.rql.converter.ValueConverter;
+import net.jazdw.rql.util.DefaultTextDecoder;
 import net.jazdw.rql.util.TextDecoder;
 
 public class ValueVisitor extends RqlBaseVisitor<Object> {
 
     private final TextDecoder decoder;
     private final ValueConverter<Object> converter;
+
+    public ValueVisitor() {
+        this(new DefaultTextDecoder(), new DefaultValueConverter());
+    }
 
     public ValueVisitor(TextDecoder decoder, ValueConverter<Object> converter) {
         this.decoder = decoder;
