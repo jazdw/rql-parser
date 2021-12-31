@@ -27,25 +27,25 @@ import org.antlr.v4.runtime.Token;
 import net.jazdw.rql.RqlBaseVisitor;
 import net.jazdw.rql.RqlParser;
 import net.jazdw.rql.RqlParser.AndContext;
-import net.jazdw.rql.RqlParser.EqualsContext;
 import net.jazdw.rql.RqlParser.ExpressionContext;
 import net.jazdw.rql.RqlParser.GroupContext;
 import net.jazdw.rql.RqlParser.LogicalContext;
 import net.jazdw.rql.RqlParser.OrContext;
 import net.jazdw.rql.RqlParser.PredicateContext;
+import net.jazdw.rql.RqlParser.ShortPredicateContext;
 import net.jazdw.rql.util.PropertyAccessor;
 import net.jazdw.rql.util.TextDecoder;
 
 public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
 
-    private static final Map<String, String> OPERATOR_MAP = Map.of(
-            "=", "eq",
-            "==", "eq",
-            ">", "gt",
-            ">=", "ge",
-            "<", "lt",
-            "<=", "le",
-            "!=", "ne"
+    public static final Map<String, Integer> SHORT_OPERATOR_MAP = Map.of(
+            "=", RqlParser.EQUALS,
+            "==", RqlParser.EQUALS,
+            ">", RqlParser.GREATER_THAN,
+            ">=", RqlParser.GREATER_THAN_OR_EQUAL,
+            "<", RqlParser.LESS_THAN,
+            "<=", RqlParser.LESS_THAN_OR_EQUAL,
+            "!=", RqlParser.NOT_EQUALS
     );
 
     private final ValueVisitor valueVisitor;
@@ -78,7 +78,7 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
     @Override
     public Predicate<T> visitLogical(LogicalContext ctx) {
         List<Predicate<T>> childPredicates = childPredicates(ctx.expression());
-        Token operator = ctx.logicalOperator().op;
+        Token operator = ctx.logicalOperator().getStart();
         switch (operator.getType()) {
             case RqlParser.AND:
                 return item -> childPredicates.stream().allMatch(p -> p.test(item));
@@ -95,10 +95,17 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
     }
 
     @Override
-    public Predicate<T> visitEquals(EqualsContext ctx) {
-        String propertyName = decoder.apply(ctx.identifier().id.getText());
-        Object value = valueVisitor.visitValue(ctx.value());
-        return (item) -> accessor.getComparator(propertyName).compare(accessor.getProperty(item, propertyName), value) == 0;
+    public Predicate<T> visitShortPredicate(ShortPredicateContext ctx) {
+        String propertyName = decoder.apply(ctx.identifier().getText());
+        String shortOperator = ctx.shortPredicateOperator().getText();
+        int operatorTokenType = SHORT_OPERATOR_MAP.get(shortOperator);
+        Object firstArg = valueVisitor.visitValue(ctx.value());
+
+        return (item) -> {
+            Object propertyValue = accessor.getProperty(item, propertyName);
+            int result = accessor.getComparator(propertyName).compare(propertyValue, firstArg);
+            return checkComparatorResult(operatorTokenType, result);
+        };
     }
 
     @Override
@@ -106,7 +113,7 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
         String propertyName = decoder.apply(ctx.identifier().id.getText());
         Object firstArg = valueVisitor.visitValue(ctx.value(0));
 
-        Token operator = ctx.predicateOperator().op;
+        Token operator = ctx.predicateOperator().getStart();
         switch (operator.getType()) {
             case RqlParser.EQUALS:
             case RqlParser.NOT_EQUALS:
@@ -117,7 +124,7 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
                 return (item) -> {
                     Object propertyValue = accessor.getProperty(item, propertyName);
                     int result = accessor.getComparator(propertyName).compare(propertyValue, firstArg);
-                    return checkComparatorResult(operator, result);
+                    return checkComparatorResult(operator.getType(), result);
                 };
             case RqlParser.MATCH: {
                 Pattern pattern;
@@ -176,8 +183,8 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
                 .collect(Collectors.toList());
     }
 
-    private boolean checkComparatorResult(Token operator, int value) {
-        switch (operator.getType()) {
+    private boolean checkComparatorResult(int tokenType, int value) {
+        switch (tokenType) {
             case RqlParser.EQUALS:
                 return value == 0;
             case RqlParser.NOT_EQUALS:
@@ -191,7 +198,7 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
             case RqlParser.GREATER_THAN_OR_EQUAL:
                 return value >= 0;
             default:
-                throw new UnsupportedOperationException("Unsupported predicate type: " + operator.getText());
+                throw new UnsupportedOperationException("Unsupported token type");
         }
     }
 

@@ -14,11 +14,11 @@
 
 package net.jazdw.rql.visitor;
 
+import java.util.Map;
 import java.util.Objects;
 
 import net.jazdw.rql.RqlBaseVisitor;
 import net.jazdw.rql.RqlParser.AndContext;
-import net.jazdw.rql.RqlParser.EqualsContext;
 import net.jazdw.rql.RqlParser.ExpressionContext;
 import net.jazdw.rql.RqlParser.FunctionContext;
 import net.jazdw.rql.RqlParser.GroupContext;
@@ -26,6 +26,7 @@ import net.jazdw.rql.RqlParser.LogicalContext;
 import net.jazdw.rql.RqlParser.OrContext;
 import net.jazdw.rql.RqlParser.PredicateContext;
 import net.jazdw.rql.RqlParser.QueryContext;
+import net.jazdw.rql.RqlParser.ShortPredicateContext;
 import net.jazdw.rql.converter.DefaultValueConverter;
 import net.jazdw.rql.converter.ValueConverter;
 import net.jazdw.rql.parser.ASTNode;
@@ -36,6 +37,16 @@ import net.jazdw.rql.util.TextDecoder;
  * @author Jared Wiltshire
  */
 public class ASTGenerator extends RqlBaseVisitor<ASTNode> {
+
+    public static final Map<String, String> SHORT_OPERATOR_MAP = Map.of(
+            "=", "eq",
+            "==", "eq",
+            ">", "gt",
+            ">=", "ge",
+            "<", "lt",
+            "<=", "le",
+            "!=", "ne"
+    );
 
     private final TextDecoder decoder;
     private final ValueVisitor valueVisitor;
@@ -111,9 +122,11 @@ public class ASTGenerator extends RqlBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitEquals(EqualsContext ctx) {
+    public ASTNode visitShortPredicate(ShortPredicateContext ctx) {
         String identifier = decoder.apply(ctx.identifier().getText());
-        ASTNode node = new ASTNode("eq");
+        String shortOperator = ctx.shortPredicateOperator().getText();
+        String operator = SHORT_OPERATOR_MAP.get(shortOperator);
+        ASTNode node = new ASTNode(operator);
         node.addArgument(identifier);
         node.addArgument(valueVisitor.visitValue(ctx.value()));
         return node;

@@ -45,7 +45,7 @@ expression
     | predicateOperator OPEN_PARENTHESIS identifier COMMA value (COMMA value)* CLOSE_PARENTHESIS #predicate
     | functionName OPEN_PARENTHESIS value? (COMMA value)* CLOSE_PARENTHESIS #function
     | identifier EQUALS_SIGN predicateOperator EQUALS_SIGN value #predicate
-    | identifier EQUALS_SIGN value #equals
+    | identifier shortPredicateOperator value #shortPredicate
     ;
 
 functionName
@@ -71,13 +71,13 @@ arrayValue
     ;
 
 logicalOperator
-    : op=(AND
+    : AND
     | OR
-    | NOT)
+    | NOT
     ;
 
 predicateOperator
-    : op=(EQUALS
+    : EQUALS
     | NOT_EQUALS
     | LESS_THAN
     | LESS_THAN_OR_EQUAL
@@ -85,7 +85,17 @@ predicateOperator
     | GREATER_THAN_OR_EQUAL
     | IN
     | CONTAINS
-    | MATCH)
+    | MATCH
+    ;
+
+shortPredicateOperator
+    : EQUALS_SIGN
+    | EXCLAIMATION_POINT EQUALS_SIGN
+    | EQUALS_SIGN EQUALS_SIGN
+    | LEFT_ANGLE_BRACKET EQUALS_SIGN
+    | LEFT_ANGLE_BRACKET
+    | RIGHT_ANGLE_BRACKET EQUALS_SIGN
+    | RIGHT_ANGLE_BRACKET
     ;
 
 /* Lexer rules */
@@ -101,6 +111,9 @@ OPEN_PARENTHESIS    : '(' ;
 CLOSE_PARENTHESIS   : ')' ;
 COMMA               : ',' ;
 COLON               : ':' ;
+RIGHT_ANGLE_BRACKET : '>' ;
+LEFT_ANGLE_BRACKET  : '<' ;
+EXCLAIMATION_POINT  : '!' ;
 
 AND                 : 'and' ;
 OR                  : 'or' ;
