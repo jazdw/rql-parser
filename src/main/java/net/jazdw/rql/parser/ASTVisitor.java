@@ -14,9 +14,13 @@
 
 package net.jazdw.rql.parser;
 
+import net.jazdw.rql.RqlBaseVisitor;
+
 /**
  * @author Jared Wiltshire
+ * @deprecated Use {@link RqlBaseVisitor} instead
  */
+@Deprecated
 public interface ASTVisitor<R, A> {
     R visit(ASTNode node, A param);
 }

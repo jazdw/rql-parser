@@ -31,7 +31,11 @@ public class ValueVisitor extends RqlBaseVisitor<Object> {
     private final ValueConverter<Object> converter;
 
     public ValueVisitor() {
-        this(new DefaultTextDecoder(), new DefaultValueConverter());
+        this(new DefaultValueConverter());
+    }
+
+    public ValueVisitor(ValueConverter<Object> converter) {
+        this(new DefaultTextDecoder(), converter);
     }
 
     public ValueVisitor(TextDecoder decoder, ValueConverter<Object> converter) {

@@ -16,6 +16,7 @@ package net.jazdw.rql.visitor;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -36,6 +37,16 @@ import net.jazdw.rql.util.PropertyAccessor;
 import net.jazdw.rql.util.TextDecoder;
 
 public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
+
+    private static final Map<String, String> OPERATOR_MAP = Map.of(
+            "=", "eq",
+            "==", "eq",
+            ">", "gt",
+            ">=", "ge",
+            "<", "lt",
+            "<=", "le",
+            "!=", "ne"
+    );
 
     private final ValueVisitor valueVisitor;
     private final PropertyAccessor<T, Object> accessor;

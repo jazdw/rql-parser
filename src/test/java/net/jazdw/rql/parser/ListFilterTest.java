@@ -103,7 +103,7 @@ public class ListFilterTest {
 
     @Test
     public void testMatch() {
-        ASTNode node = parser.parse("firstName=like=*azza");
+        ASTNode node = parser.parse("firstName=match=*azza");
         List<Person> results = node.accept(filter, people);
         assertEquals(3, results.size());
         for (Person p : results) {
@@ -117,7 +117,7 @@ public class ListFilterTest {
             assertTrue(p.getFirstName().startsWith("M"));
         }
 
-        node = parser.parse("lastName=match=*Ñ*");
+        node = parser.parse("lastName=match=*%C3%91*");
         results = node.accept(filter, people);
         assertEquals(1, results.size());
         assertEquals(MANUEL_MUNOZ, results.get(0));
