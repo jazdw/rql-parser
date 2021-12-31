@@ -41,7 +41,7 @@ import net.jazdw.rql.visitor.ValueVisitor;
 /**
  * @author Jared Wiltshire
  */
-public class AntlrRqlParserTest {
+public class RqlParserTest {
 
     ValueVisitor valueVisitor = new ValueVisitor();
 

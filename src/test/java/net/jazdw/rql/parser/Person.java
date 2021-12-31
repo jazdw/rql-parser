@@ -12,7 +12,7 @@
  * Lesser General Public License for more details.
  */
 
-package net.jazdw.rql.parser.listfilter;
+package net.jazdw.rql.parser;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

@@ -15,22 +15,31 @@
 package net.jazdw.rql.parser;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import net.jazdw.rql.parser.listfilter.ListFilter;
-import net.jazdw.rql.parser.listfilter.Person;
+import net.jazdw.rql.RqlLexer;
+import net.jazdw.rql.RqlParser;
+import net.jazdw.rql.visitor.QueryVisitor;
 
 /**
  * @author Jared Wiltshire
  */
 public class ListFilterTest {
+
     static final Person HARRY_SMITH = new Person("Harry", "Smith", LocalDate.of(1954, 3, 18), "Male", "English");
     static final Person JILL_SMITH = new Person("Jill", "Smith", LocalDate.of(2001, 1, 16), "Female", "English");
     static final Person OLIVER_SMITH = new Person("Oliver", "Smith", LocalDate.of(1930, 2, 12), "Male", "English");
@@ -47,7 +56,7 @@ public class ListFilterTest {
     static final Person BETTY_BROWN = new Person("Betty", "Brown", LocalDate.of(1985, 7, 10), "Female", "American");
     static final Person MADISON_MILLER = new Person("Madison", "Miller", LocalDate.of(1972, 3, 28), "Female", "American");
     static final Person JAYDEN_DAVIS = new Person("Jayden", "Davis", LocalDate.of(2005, 12, 23), "Male", "American");
-    static List<Person> people = Arrays.asList(
+    static final List<Person> PEOPLE = List.of(
             HARRY_SMITH,
             JILL_SMITH,
             OLIVER_SMITH,
@@ -64,27 +73,95 @@ public class ListFilterTest {
             BETTY_BROWN,
             MADISON_MILLER,
             JAYDEN_DAVIS);
-    RQLParser parser;
-    ListFilter<Person> filter;
+    QueryVisitor<Person> filter;
 
     @Before
     public void before() {
-        parser = new RQLParser();
-        filter = new ListFilter<>();
+        filter = new QueryVisitor<>(this::getProperty);
+    }
+
+    private RqlParser createParser(String rql) {
+        CharStream inputStream = CharStreams.fromString(rql);
+        RqlLexer lexer = new RqlLexer(inputStream);
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        RqlParser parser = new RqlParser(tokenStream);
+        parser.setErrorHandler(new BailErrorStrategy());
+        return parser;
+    }
+
+    /**
+     * Basic reflection based property access, do not use in production.
+     */
+    private Object getProperty(Person item, String propertyName) {
+        String upperFirstChar = propertyName.substring(0, 1).toUpperCase(Locale.ROOT) + propertyName.substring(1);
+        try {
+            Method method = item.getClass().getDeclaredMethod("get" + upperFirstChar);
+            return method.invoke(item);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException(String.format("Error accessing property named '%s'", propertyName), e);
+        }
+    }
+
+    @Test
+    public void testBasicAndSymbol() {
+        RqlParser parser = createParser("firstName=Shazza&lastName=Smith");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(1, results.size());
+        assertEquals(SHAZZA_SMITH, results.get(0));
+    }
+
+    @Test
+    public void testBasicOrSymbol() {
+        RqlParser parser = createParser("firstName=Shazza|lastName=Smith");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(5, results.size());
+        assertTrue(results.contains(HARRY_SMITH));
+        assertTrue(results.contains(JILL_SMITH));
+        assertTrue(results.contains(OLIVER_SMITH));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
+    }
+
+    @Test
+    public void testBasicAnd() {
+        RqlParser parser = createParser("and(firstName=Shazza,lastName=Smith)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(1, results.size());
+        assertEquals(SHAZZA_SMITH, results.get(0));
+    }
+
+    @Test
+    public void testBasicOr() {
+        RqlParser parser = createParser("or(firstName=Shazza,lastName=Smith)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(5, results.size());
+        assertTrue(results.contains(HARRY_SMITH));
+        assertTrue(results.contains(JILL_SMITH));
+        assertTrue(results.contains(OLIVER_SMITH));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
+    }
+
+    @Test
+    public void testNot() {
+        RqlParser parser = createParser("not(and(firstName=Shazza,lastName=Smith))");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(PEOPLE.size() - 1, results.size());
+        assertFalse(results.contains(SHAZZA_SMITH));
     }
 
     @Test
     public void testAnd() {
-        ASTNode node = parser.parse("firstName=Shazza&age>50");
-        List<Person> results = node.accept(filter, people);
+        RqlParser parser = createParser("firstName=Shazza&dateOfBirth=lt=date:1980-01-01");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(SHAZZA_SMITH, results.get(0));
     }
 
     @Test
     public void testOr() {
-        ASTNode node = parser.parse("nationality=Spanish|dateOfBirth>=date:2000-01-01");
-        List<Person> results = node.accept(filter, people);
+        RqlParser parser = createParser("nationality=Spanish|dateOfBirth=ge=date:2000-01-01");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(6, results.size());
         for (Person p : results) {
             assertTrue(p.getNationality().equals("Spanish") || p.getDateOfBirth().compareTo(LocalDate.of(2000, 1, 1)) >= 0);
@@ -93,82 +170,142 @@ public class ListFilterTest {
 
     @Test
     public void testAndOr() {
-        ASTNode node = parser.parse("(nationality=English|lastName=Smith)&age>20");
-        List<Person> results = node.accept(filter, people);
+        RqlParser parser = createParser("(nationality=English|lastName=Smith)&dateOfBirth=lt=date:2001-01-01");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(3, results.size());
         for (Person p : results) {
-            assertTrue((p.getNationality().equals("English") || p.getLastName().equals("Smith")) && p.getAge() > 20);
+            assertTrue((p.getNationality().equals("English") || p.getLastName().equals("Smith")) &&
+                    p.getDateOfBirth().isBefore(LocalDate.of(2001, 1, 1)));
         }
     }
 
     @Test
     public void testMatch() {
-        ASTNode node = parser.parse("firstName=match=*azza");
-        List<Person> results = node.accept(filter, people);
+        RqlParser parser = createParser("firstName=match=*azza");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(3, results.size());
         for (Person p : results) {
             assertEquals("Australian", p.getNationality());
         }
 
-        node = parser.parse("match(firstName,m*)");
-        results = node.accept(filter, people);
+        parser = createParser("match(firstName,m*)");
+        results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(3, results.size());
         for (Person p : results) {
             assertTrue(p.getFirstName().startsWith("M"));
         }
+    }
 
-        node = parser.parse("lastName=match=*%C3%91*");
-        results = node.accept(filter, people);
+    @Test
+    public void testMatchSingleChar() {
+        RqlParser parser = createParser("match(firstName,%3Fazza)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(1, results.size());
+        assertEquals(DAZZA_WILLIAMS, results.get(0));
+    }
+
+    @Test
+    public void testMatchUnicode() {
+        RqlParser parser = createParser("lastName=match=*%C3%91*");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(MANUEL_MUNOZ, results.get(0));
     }
 
     @Test
+    public void testMatchRegex() {
+        RqlParser parser = createParser("match(firstName,re:m.*l)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(1, results.size());
+        assertTrue(results.contains(MANUEL_MUNOZ));
+    }
+
+    @Test
+    public void testMatchRegexCaseSensitive() {
+        RqlParser parser = createParser("match(firstName,RE:m.*)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(0, results.size());
+
+        parser = createParser("match(firstName,RE:M.*)");
+        results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(3, results.size());
+    }
+
+    @Test
     public void testUTFEncoding() {
-        ASTNode node = parser.parse("firstName=Jos%C3%A9|lastName=Rodr%C3%ADguez");
-        List<Person> results = node.accept(filter, people);
+        RqlParser parser = createParser("firstName=Jos%C3%A9|lastName=Rodr%C3%ADguez");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(JOSE_RODRIGUEZ, results.get(0));
     }
 
     @Test
     public void testSort() {
-        ASTNode node = parser.parse("sort(-firstName)");
-        List<Person> results = node.accept(filter, people);
-        assertEquals(people.size(), results.size());
+        RqlParser parser = createParser("sort(-firstName)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(PEOPLE.size(), results.size());
         assertEquals("Shazza", results.get(0).getFirstName());
 
-        node = parser.parse("sort(+lastName,-firstName)");
-        results = node.accept(filter, people);
-        assertEquals(people.size(), results.size());
+        parser = createParser("sort(+lastName,-firstName)");
+        results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(PEOPLE.size(), results.size());
         assertEquals(BILLY_BROWN, results.get(0));
         assertEquals(DAZZA_WILLIAMS, results.get(15));
     }
 
     @Test
     public void testLimit() {
-        ASTNode node = parser.parse("limit(10)");
-        List<Person> results = node.accept(filter, people);
+        RqlParser parser = createParser("limit(10)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(10, results.size());
 
-        node = parser.parse("limit(5,9)");
-        results = node.accept(filter, people);
+        parser = createParser("limit(5,9)");
+        results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(5, results.size());
         assertEquals(JOSE_RODRIGUEZ, results.get(0));
 
         // test for IndexOutOfBoundsException
-        node = parser.parse("limit(10,15)");
-        results = node.accept(filter, people);
+        parser = createParser("limit(10,15)");
+        results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(1, results.size());
         assertEquals(JAYDEN_DAVIS, results.get(0));
     }
 
     @Test
     public void testIn() {
-        ASTNode node = parser.parse("firstName=in=(Shazza,Dazza)");
-        List<Person> results = node.accept(filter, people);
+        RqlParser parser = createParser("firstName=in=(Shazza,Dazza)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
         assertEquals(3, results.size());
         assertTrue(results.contains(DAZZA_WILLIAMS));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
+    }
+
+    @Test
+    public void testInForm2() {
+        RqlParser parser = createParser("in(firstName,(Shazza,Dazza))");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(3, results.size());
+        assertTrue(results.contains(DAZZA_WILLIAMS));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
+    }
+
+    @Test
+    public void testInForm3() {
+        RqlParser parser = createParser("in(firstName,Shazza,Dazza)");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(3, results.size());
+        assertTrue(results.contains(DAZZA_WILLIAMS));
+        assertTrue(results.contains(SHAZZA_TAYLOR));
+        assertTrue(results.contains(SHAZZA_SMITH));
+    }
+
+    @Test
+    public void testContains() {
+        RqlParser parser = createParser("names=contains=Shazza");
+        List<Person> results = filter.visit(parser.query()).applyList(PEOPLE);
+        assertEquals(2, results.size());
         assertTrue(results.contains(SHAZZA_TAYLOR));
         assertTrue(results.contains(SHAZZA_SMITH));
     }

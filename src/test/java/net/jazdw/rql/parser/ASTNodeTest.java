@@ -25,7 +25,7 @@ import org.junit.Test;
 /**
  * @author Jared Wiltshire
  */
-public class RQLParserTest {
+public class ASTNodeTest {
     RQLParser parser;
 
     @Before
