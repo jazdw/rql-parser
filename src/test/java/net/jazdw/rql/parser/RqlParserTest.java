@@ -48,8 +48,10 @@ public class RqlParserTest {
     private RqlParser createParser(String rql) {
         CharStream inputStream = CharStreams.fromString(rql);
         RqlLexer lexer = new RqlLexer(inputStream);
+        lexer.removeErrorListeners();
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         RqlParser parser = new RqlParser(tokenStream);
+        parser.removeErrorListeners();
         parser.setErrorHandler(new BailErrorStrategy());
         return parser;
     }

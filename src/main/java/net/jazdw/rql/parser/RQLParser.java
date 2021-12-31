@@ -67,8 +67,10 @@ public class RQLParser {
     public ASTNode parse(String query) throws RQLParserException {
         CharStream inputStream = CharStreams.fromString(query);
         RqlLexer lexer = new RqlLexer(inputStream);
+        lexer.removeErrorListeners();
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         RqlParser parser = new RqlParser(tokenStream);
+        parser.removeErrorListeners();
         parser.setErrorHandler(new BailErrorStrategy());
         try {
             return parser.query().accept(astGenerator);
