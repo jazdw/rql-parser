@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -74,10 +73,9 @@ public class ASTNodeTest {
         assertEquals(new ASTNode("eq", "equation", "(a+b)*c"), parser.parse("equation=%28a%2Bb%29%2Ac"));
     }
 
-    // TODO decide if we should support these
-    @Ignore
-    @Test
+    @Test(expected = RQLParserException.class)
     public void operatorPropertyNames() {
+        // these used to be supported, now considered malformed, if you need to use a reserved name, percent-encode it
         assertEquals(new ASTNode("eq", "and", "yes"), parser.parse("and=yes"));
 
         ASTNode expected = new ASTNode("and")
@@ -85,6 +83,11 @@ public class ASTNodeTest {
                 .createChildNode("eq", "or", "yes").getParent();
 
         assertEquals(expected, parser.parse("and(and=no,or=yes)"));
+    }
+
+    @Test
+    public void operatorNameInsidePropertyName() {
+        assertEquals(new ASTNode("eq", "andOne", "yes"), parser.parse("andOne=yes"));
     }
 
     @Test
@@ -121,14 +124,13 @@ public class ASTNodeTest {
 
     @Test
     public void empty() {
-        ASTNode expected = new ASTNode("");
+        ASTNode expected = new ASTNode("and");
         assertEquals(expected, parser.parse(""));
     }
 
-    // TODO decide if we should support these
-    @Ignore
-    @Test
+    @Test(expected = RQLParserException.class)
     public void oddRootNodes() {
+        // these used to be supported, now considered malformed
         assertEquals(new ASTNode("", "test"), parser.parse("test"));
         assertEquals(new ASTNode("", "test", "test2"), parser.parse("test,test2"));
         assertEquals(new ASTNode("").addArgument(Arrays.asList("test", "test2")),

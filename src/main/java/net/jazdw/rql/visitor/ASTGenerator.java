@@ -70,7 +70,7 @@ public class ASTGenerator extends RqlBaseVisitor<ASTNode> {
         if (expression != null) {
             return expression.accept(this);
         }
-        return new ASTNode("");
+        return new ASTNode("and");
     }
 
     @Override

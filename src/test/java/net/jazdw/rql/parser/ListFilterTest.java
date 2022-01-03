@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
-import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -33,6 +32,7 @@ import org.junit.Test;
 
 import net.jazdw.rql.RqlLexer;
 import net.jazdw.rql.RqlParser;
+import net.jazdw.rql.util.ThrowWithDetailsErrorListener;
 import net.jazdw.rql.visitor.QueryVisitor;
 
 /**
@@ -84,10 +84,11 @@ public class ListFilterTest {
         CharStream inputStream = CharStreams.fromString(rql);
         RqlLexer lexer = new RqlLexer(inputStream);
         lexer.removeErrorListeners();
+        lexer.addErrorListener(new ThrowWithDetailsErrorListener());
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         RqlParser parser = new RqlParser(tokenStream);
         parser.removeErrorListeners();
-        parser.setErrorHandler(new BailErrorStrategy());
+        parser.addErrorListener(new ThrowWithDetailsErrorListener());
         return parser;
     }
 
