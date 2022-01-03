@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.antlr.v4.runtime.CharStream;
@@ -35,6 +36,14 @@ import org.junit.Test;
 import net.jazdw.rql.RqlLexer;
 import net.jazdw.rql.RqlParser;
 import net.jazdw.rql.RqlParser.QueryContext;
+import net.jazdw.rql.converter.DefaultValueConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.BooleanConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.CaseInsensitiveRegexConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.EpochTimestampConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.GenericDateTimeConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.NumberConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.RegexConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.StringConverter;
 import net.jazdw.rql.util.ThrowWithDetailsErrorListener;
 import net.jazdw.rql.visitor.ValueVisitor;
 
@@ -43,7 +52,15 @@ import net.jazdw.rql.visitor.ValueVisitor;
  */
 public class RqlParserTest {
 
-    final ValueVisitor valueVisitor = new ValueVisitor();
+    final ValueVisitor valueVisitor = new ValueVisitor(new DefaultValueConverter(Map.of(
+            "number", NumberConverter.INSTANCE,
+            "epoch", EpochTimestampConverter.INSTANCE,
+            "date", GenericDateTimeConverter.INSTANCE,
+            "boolean", BooleanConverter.INSTANCE,
+            "string", StringConverter.INSTANCE,
+            "re", CaseInsensitiveRegexConverter.INSTANCE,
+            "RE", RegexConverter.INSTANCE
+    )));
 
     private RqlParser createParser(String rql) {
         CharStream inputStream = CharStreams.fromString(rql);
@@ -207,5 +224,10 @@ public class RqlParserTest {
         Pattern parsedPattern = (Pattern) parsed;
         assertEquals(expected.pattern(), parsedPattern.pattern());
         assertEquals(0, parsedPattern.flags());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void invalidConverterType() {
+        parseValue("abc:test");
     }
 }

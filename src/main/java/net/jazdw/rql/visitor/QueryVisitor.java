@@ -21,7 +21,6 @@ import net.jazdw.rql.RqlBaseVisitor;
 import net.jazdw.rql.RqlParser.ExpressionContext;
 import net.jazdw.rql.RqlParser.QueryContext;
 import net.jazdw.rql.converter.DefaultValueConverter;
-import net.jazdw.rql.converter.ValueConverter;
 import net.jazdw.rql.util.DefaultTextDecoder;
 import net.jazdw.rql.util.LimitOffset;
 import net.jazdw.rql.util.PropertyAccessor;
@@ -34,8 +33,12 @@ public class QueryVisitor<T> extends RqlBaseVisitor<StreamFilter<T>> {
     private final SortVisitor<T> sortVisitor;
     private final LimitOffsetVisitor limitOffsetVisitor;
 
+
     public QueryVisitor(PropertyAccessor<T, Object> accessor) {
-        ValueConverter<Object> converter = new DefaultValueConverter();
+        this(accessor, new DefaultValueConverter());
+    }
+
+    public QueryVisitor(PropertyAccessor<T, Object> accessor, DefaultValueConverter converter) {
         TextDecoder decoder = new DefaultTextDecoder();
         ValueVisitor valueVisitor = new ValueVisitor(decoder, converter);
 

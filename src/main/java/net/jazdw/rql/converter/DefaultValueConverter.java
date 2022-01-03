@@ -94,7 +94,10 @@ public class DefaultValueConverter implements ValueConverter<Object> {
 
     @Override
     public Object convert(String type, String textValue) {
-        ValueConverter<?> converter = converterMap.getOrDefault(type, defaultConverter);
+        ValueConverter<?> converter = converterMap.get(type);
+        if (converter == null) {
+            throw new IllegalArgumentException("Unknown converter type '" + type + "'");
+        }
         return converter.convert(textValue);
     }
 

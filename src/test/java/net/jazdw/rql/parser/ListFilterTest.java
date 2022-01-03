@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -32,6 +33,14 @@ import org.junit.Test;
 
 import net.jazdw.rql.RqlLexer;
 import net.jazdw.rql.RqlParser;
+import net.jazdw.rql.converter.DefaultValueConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.BooleanConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.CaseInsensitiveRegexConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.EpochTimestampConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.GenericDateTimeConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.NumberConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.RegexConverter;
+import net.jazdw.rql.converter.DefaultValueConverter.StringConverter;
 import net.jazdw.rql.util.ThrowWithDetailsErrorListener;
 import net.jazdw.rql.visitor.QueryVisitor;
 
@@ -77,7 +86,15 @@ public class ListFilterTest {
 
     @Before
     public void before() {
-        filter = new QueryVisitor<>(this::getProperty);
+        filter = new QueryVisitor<>(this::getProperty, new DefaultValueConverter(Map.of(
+                "number", NumberConverter.INSTANCE,
+                "epoch", EpochTimestampConverter.INSTANCE,
+                "date", GenericDateTimeConverter.INSTANCE,
+                "boolean", BooleanConverter.INSTANCE,
+                "string", StringConverter.INSTANCE,
+                "re", CaseInsensitiveRegexConverter.INSTANCE,
+                "RE", RegexConverter.INSTANCE
+        )));
     }
 
     private RqlParser createParser(String rql) {
