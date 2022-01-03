@@ -37,7 +37,7 @@ class AutoValueConverter implements ValueConverter<Object> {
      */
     public static final Map<String, Object> DEFAULT_CONVERSIONS;
     // detects ISO 8601 dates with a minimum of year, month and day specified
-    private static final Pattern DATE_PATTERN = Pattern.compile("^[0-9]{4}-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])(T(2[0-3]|[01][0-9])(:[0-5][0-9])?(:[0-5][0-9])?(\\.[0-9][0-9]?[0-9]?)?(Z|[+-](?:2[0-3]|[01][0-9])(?::?(?:[0-5][0-9]))?)?)?$");
+    private static final Pattern DATE_PATTERN = Pattern.compile("^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])(?:T|$)");
 
     static {
         Map<String, Object> defaultConversions = new HashMap<>();
@@ -75,7 +75,7 @@ class AutoValueConverter implements ValueConverter<Object> {
             }
 
             try {
-                if (DATE_PATTERN.matcher(textValue).matches()) {
+                if (DATE_PATTERN.matcher(textValue).find()) {
                     return GenericDateTimeConverter.INSTANCE.convert(textValue);
                 }
             } catch (ConverterException e) {

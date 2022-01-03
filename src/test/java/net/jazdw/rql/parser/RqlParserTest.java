@@ -43,7 +43,7 @@ import net.jazdw.rql.visitor.ValueVisitor;
  */
 public class RqlParserTest {
 
-    ValueVisitor valueVisitor = new ValueVisitor();
+    final ValueVisitor valueVisitor = new ValueVisitor();
 
     private RqlParser createParser(String rql) {
         CharStream inputStream = CharStreams.fromString(rql);
