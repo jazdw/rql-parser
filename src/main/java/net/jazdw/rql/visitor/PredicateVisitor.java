@@ -110,7 +110,7 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
 
     @Override
     public Predicate<T> visitPredicate(PredicateContext ctx) {
-        String propertyName = decoder.apply(ctx.identifier().id.getText());
+        String propertyName = ctx.identifier() == null ? null : decoder.apply(ctx.identifier().id.getText());
         Object firstArg = valueVisitor.visitValue(ctx.value(0));
 
         Token operator = ctx.predicateOperator().getStart();

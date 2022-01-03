@@ -17,12 +17,35 @@ package net.jazdw.rql.util;
 import java.util.Comparator;
 
 public interface PropertyAccessor<T, R> {
-    R getProperty(T item, String propertyName);
 
+    /**
+     * Get the value of an item's property/field
+     *
+     * @param item     any object
+     * @param property name of the property/field, could be a JSON pointer for example.
+     *                 May be null to represent the object itself.
+     * @return value of the property/field
+     */
+    R getProperty(T item, String property);
+
+    /**
+     * Get a comparator for the given property name
+     *
+     * @param property name of the property/field, could be a JSON pointer for example
+     *                 May be null to represent the object itself.
+     * @return comparator for property
+     */
     default Comparator<Object> getComparator(String property) {
         return DefaultComparator.INSTANCE;
     }
 
+    /**
+     * Get a comparator that can be used to sort a list of items by a certain property
+     *
+     * @param property name of the property/field, could be a JSON pointer for example
+     *                 May be null to represent the object itself.
+     * @return comparator for sorting
+     */
     default Comparator<T> getSortComparator(String property) {
         Comparator<Object> propertyComparator = getComparator(property);
         return (a, b) -> {

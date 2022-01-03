@@ -25,7 +25,7 @@ expression
     | logicalOperator OPEN_PARENTHESIS expression? (COMMA expression)* CLOSE_PARENTHESIS #logical
     | expression AMPERSAND expression #and
     | expression VERTICAL_BAR expression #or
-    | predicateOperator OPEN_PARENTHESIS identifier COMMA value (COMMA value)* CLOSE_PARENTHESIS #predicate
+    | predicateOperator OPEN_PARENTHESIS (identifier COMMA)? value (COMMA value)* CLOSE_PARENTHESIS #predicate
     | functionName OPEN_PARENTHESIS value? (COMMA value)* CLOSE_PARENTHESIS #function
     | identifier EQUALS_SIGN predicateOperator EQUALS_SIGN value #predicate
     | identifier shortPredicateOperator value #shortPredicate

@@ -312,4 +312,47 @@ public class ListFilterTest {
         assertTrue(results.contains(SHAZZA_TAYLOR));
         assertTrue(results.contains(SHAZZA_SMITH));
     }
+
+    @Test
+    public void filterIntegers() {
+        QueryVisitor<Integer> filter = new QueryVisitor<>((item, prop) -> item);
+
+        RqlParser parser = createParser("lt(2)");
+        List<Integer> results = filter.visit(parser.query()).applyList(List.of(1, 2));
+        assertEquals(1, results.size());
+        assertTrue(results.contains(1));
+    }
+
+    @Test
+    public void sortStrings() {
+        QueryVisitor<String> filter = new QueryVisitor<>((item, prop) -> item);
+
+        RqlParser parser = createParser("sort()");
+        List<String> results = filter.visit(parser.query()).applyList(List.of("b", "a"));
+        assertEquals(2, results.size());
+        assertEquals("a", results.get(0));
+        assertEquals("b", results.get(1));
+    }
+
+    @Test
+    public void sortStrings2() {
+        QueryVisitor<String> filter = new QueryVisitor<>((item, prop) -> item);
+
+        RqlParser parser = createParser("sort(+)");
+        List<String> results = filter.visit(parser.query()).applyList(List.of("b", "a"));
+        assertEquals(2, results.size());
+        assertEquals("a", results.get(0));
+        assertEquals("b", results.get(1));
+    }
+
+    @Test
+    public void sortStringsReverse() {
+        QueryVisitor<String> filter = new QueryVisitor<>((item, prop) -> item);
+
+        RqlParser parser = createParser("sort(-)");
+        List<String> results = filter.visit(parser.query()).applyList(List.of("a", "b"));
+        assertEquals(2, results.size());
+        assertEquals("b", results.get(0));
+        assertEquals("a", results.get(1));
+    }
 }
