@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jared Wiltshire (https://jazdw.net).
+ * Copyright (C) 2022 Jared Wiltshire (https://jazdw.net).
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Lesser General Public License
@@ -21,19 +21,19 @@ import java.util.regex.Matcher;
  */
 public abstract class RegexReplacer {
     protected final Matcher matcher;
-    
+
     public RegexReplacer(Matcher matcher) {
         this.matcher = matcher;
     }
-    
+
     public String replace() {
         StringBuffer sb = new StringBuffer();
-        while(matcher.find()) {
+        while (matcher.find()) {
             matcher.appendReplacement(sb, replaceWith());
         }
         matcher.appendTail(sb);
         return sb.toString();
     }
-    
+
     public abstract String replaceWith();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jared Wiltshire (https://jazdw.net).
+ * Copyright (C) 2022 Jared Wiltshire (https://jazdw.net).
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Lesser General Public License
@@ -28,33 +28,33 @@ public class ASTNode implements Iterable<Object> {
     private ASTNode parent;
     private String name;
     private final List<Object> arguments;
-    
+
     public ASTNode(String name, Object... arguments) {
         this(null, name, Arrays.asList(arguments));
     }
-    
+
     public ASTNode(String name, List<Object> arguments) {
         this(null, name, arguments);
     }
-    
+
     public ASTNode(ASTNode parent, String name, Object... arguments) {
         this(parent, name, Arrays.asList(arguments));
     }
-    
+
     public ASTNode(ASTNode parent, String name, List<Object> arguments) {
         this.parent = parent;
         this.name = name;
         this.arguments = new ArrayList<>(arguments);
     }
-    
+
     public <R, A> R accept(SimpleASTVisitor<R> visitor) {
         return visitor.visit(this);
     }
-    
+
     public <R, A> R accept(ASTVisitor<R, A> visitor, A param) {
         return visitor.visit(this, param);
     }
-    
+
     public ASTNode removeParents() {
         parent = null;
         for (Object arg : arguments) {
@@ -64,21 +64,21 @@ public class ASTNode implements Iterable<Object> {
         }
         return this;
     }
-    
+
     public boolean isRootNode() {
         return parent == null;
     }
-    
+
     public ASTNode createChildNode(String name, Object... arguments) {
         return createChildNode(name, Arrays.asList(arguments));
     }
-    
+
     public ASTNode createChildNode(String name, List<Object> arguments) {
         ASTNode child = new ASTNode(this, name, arguments);
         this.arguments.add(child);
         return child;
     }
-    
+
     public ASTNode addArgument(Object argument) {
         if (argument instanceof ASTNode) {
             ((ASTNode) argument).parent = this;
@@ -86,7 +86,7 @@ public class ASTNode implements Iterable<Object> {
         arguments.add(argument);
         return this;
     }
-    
+
     public Object removeLastArgument() {
         return arguments.remove(arguments.size() - 1);
     }
@@ -114,7 +114,7 @@ public class ASTNode implements Iterable<Object> {
     public List<Object> getArguments() {
         return arguments;
     }
-    
+
     public int getArgumentsSize() {
         return arguments.size();
     }
@@ -166,7 +166,7 @@ public class ASTNode implements Iterable<Object> {
     public Iterator<Object> iterator() {
         return arguments.iterator();
     }
-    
+
     public String format(String format) {
         return String.format(format, arguments.toArray());
     }
