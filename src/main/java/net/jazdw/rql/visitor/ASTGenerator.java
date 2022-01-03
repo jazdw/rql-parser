@@ -22,6 +22,7 @@ import net.jazdw.rql.RqlParser.AndContext;
 import net.jazdw.rql.RqlParser.ExpressionContext;
 import net.jazdw.rql.RqlParser.FunctionContext;
 import net.jazdw.rql.RqlParser.GroupContext;
+import net.jazdw.rql.RqlParser.IdentifierContext;
 import net.jazdw.rql.RqlParser.LogicalContext;
 import net.jazdw.rql.RqlParser.OrContext;
 import net.jazdw.rql.RqlParser.PredicateContext;
@@ -112,7 +113,8 @@ public class ASTGenerator extends RqlBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitPredicate(PredicateContext ctx) {
         String operatorName = decoder.apply(ctx.predicateOperator().getText());
-        String identifier = decoder.apply(ctx.identifier().getText());
+        IdentifierContext id = ctx.identifier();
+        String identifier = id == null ? null : decoder.apply(id.getText());
         ASTNode node = new ASTNode(operatorName);
         node.addArgument(identifier);
         ctx.value().stream()
