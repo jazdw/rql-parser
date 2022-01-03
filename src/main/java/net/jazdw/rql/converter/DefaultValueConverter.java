@@ -45,9 +45,7 @@ public class DefaultValueConverter implements ValueConverter<Object> {
             "epoch", EpochTimestampConverter.INSTANCE,
             "date", GenericDateTimeConverter.INSTANCE,
             "boolean", BooleanConverter.INSTANCE,
-            "string", StringConverter.INSTANCE,
-            "re", CaseInsensitiveRegexConverter.INSTANCE,
-            "RE", RegexConverter.INSTANCE
+            "string", StringConverter.INSTANCE
     );
 
     private final ValueConverter<?> defaultConverter;
