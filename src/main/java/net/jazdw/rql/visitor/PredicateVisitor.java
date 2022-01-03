@@ -33,6 +33,7 @@ import net.jazdw.rql.RqlParser.LogicalContext;
 import net.jazdw.rql.RqlParser.OrContext;
 import net.jazdw.rql.RqlParser.PredicateContext;
 import net.jazdw.rql.RqlParser.ShortPredicateContext;
+import net.jazdw.rql.RqlParser.ValueContext;
 import net.jazdw.rql.util.PropertyAccessor;
 import net.jazdw.rql.util.TextDecoder;
 
@@ -131,11 +132,16 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
                 if (firstArg instanceof Pattern) {
                     pattern = (Pattern) firstArg;
                 } else if (firstArg instanceof String) {
-                    String regex = (String) firstArg;
-                    pattern = Pattern.compile(regex
+                    boolean caseSensitive = false;
+                    ValueContext secondArg = ctx.value(1);
+                    if (secondArg != null) {
+                        caseSensitive = (boolean) valueVisitor.visitValue(secondArg);
+                    }
+
+                    pattern = Pattern.compile(((String) firstArg)
                                     .replace("*", ".*")
                                     .replace("?", "."),
-                            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+                            (caseSensitive ? 0 : Pattern.CASE_INSENSITIVE) | Pattern.UNICODE_CASE);
                 } else {
                     throw new IllegalStateException("Must be pattern or regex");
                 }
