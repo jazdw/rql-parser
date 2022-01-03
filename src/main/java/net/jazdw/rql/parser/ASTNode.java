@@ -76,6 +76,7 @@ public class ASTNode implements Iterable<Object> {
 
     public ASTNode createChildNode(String name, List<Object> arguments) {
         ASTNode child = new ASTNode(this, name, arguments);
+        child.parent = this;
         this.arguments.add(child);
         return child;
     }
