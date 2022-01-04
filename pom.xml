@@ -16,7 +16,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.jazdw</groupId>
     <artifactId>rql-parser</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-beta.2</version>
     <name>RQL Parser</name>
     <description>Resource Query Language parser</description>
     <url>https://github.com/jazdw/rql-parser</url>
@@ -116,7 +116,7 @@
         <url>https://github.com/jazdw/rql-parser/tree/main</url>
         <connection>scm:git:https://github.com/jazdw/rql-parser.git</connection>
         <developerConnection>scm:git:https://github.com/jazdw/rql-parser.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.0.0-beta.2</tag>
     </scm>
     <issueManagement>
         <system>github</system>
