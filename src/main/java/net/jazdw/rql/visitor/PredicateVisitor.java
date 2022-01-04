@@ -190,6 +190,8 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
                     if (propertyValue instanceof Collection) {
                         Collection<?> collectionValue = (Collection<?>) propertyValue;
                         return collectionValue.contains(firstArg);
+                    } else if (propertyValue instanceof String) {
+                        return ((String) propertyValue).contains(String.valueOf(firstArg));
                     }
                     return false;
                 };
