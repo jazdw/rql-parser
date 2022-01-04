@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0-beta.2](https://github.com/jazdw/rql-parser/tree/v1.0.0-beta.2) (2022-01-03)
+
+* Make identifier optional for sorting/comparing collections of primitives
+* Disable regex converters by default
+* Support case sensitivity as second argument to match
+* Throw `IllegalArgumentException` when type is invalid
+* Escape regex patterns in match
+
 ## [1.0.0-beta.1](https://github.com/jazdw/rql-parser/tree/v1.0.0-beta.1) (2022-01-03)
 
 * Use [ANTLR 4](https://www.antlr.org/) to generate a lexer and parser from a grammar file
