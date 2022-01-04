@@ -15,6 +15,7 @@
 package net.jazdw.rql.parser;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -25,6 +26,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import org.antlr.v4.runtime.CharStream;
@@ -35,6 +37,7 @@ import org.junit.Test;
 
 import net.jazdw.rql.RqlLexer;
 import net.jazdw.rql.RqlParser;
+import net.jazdw.rql.RqlParser.ExpressionContext;
 import net.jazdw.rql.RqlParser.QueryContext;
 import net.jazdw.rql.converter.DefaultValueConverter;
 import net.jazdw.rql.converter.DefaultValueConverter.BooleanConverter;
@@ -44,7 +47,9 @@ import net.jazdw.rql.converter.DefaultValueConverter.GenericDateTimeConverter;
 import net.jazdw.rql.converter.DefaultValueConverter.NumberConverter;
 import net.jazdw.rql.converter.DefaultValueConverter.RegexConverter;
 import net.jazdw.rql.converter.DefaultValueConverter.StringConverter;
+import net.jazdw.rql.util.DefaultTextDecoder;
 import net.jazdw.rql.util.ThrowWithDetailsErrorListener;
+import net.jazdw.rql.visitor.PredicateVisitor;
 import net.jazdw.rql.visitor.ValueVisitor;
 
 /**
@@ -229,5 +234,15 @@ public class RqlParserTest {
     @Test(expected = IllegalArgumentException.class)
     public void invalidConverterType() {
         parseValue("abc:test");
+    }
+
+    @Test
+    public void matchRegexEscape() {
+        RqlParser parsed = createParser("match(.)");
+        ExpressionContext value = parsed.expression();
+        PredicateVisitor<String> predicateVisitor = new PredicateVisitor<>(new DefaultTextDecoder(), valueVisitor, (item, prop) -> item);
+        Predicate<String> result = predicateVisitor.visit(value);
+        assertTrue(result.test("."));
+        assertFalse(result.test("a"));
     }
 }

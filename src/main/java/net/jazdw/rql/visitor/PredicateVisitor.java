@@ -39,6 +39,8 @@ import net.jazdw.rql.util.TextDecoder;
 
 public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
 
+    private final Pattern REGEX_ESCAPE = Pattern.compile("([^*?]+)|([*?])");
+
     public static final Map<String, Integer> SHORT_OPERATOR_MAP = Map.of(
             "=", RqlParser.EQUALS,
             "==", RqlParser.EQUALS,
@@ -138,9 +140,24 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
                         caseSensitive = (boolean) valueVisitor.visitValue(secondArg);
                     }
 
-                    pattern = Pattern.compile(((String) firstArg)
-                                    .replace("*", ".*")
-                                    .replace("?", "."),
+                    String regex = REGEX_ESCAPE.matcher(((String) firstArg)).results()
+                            .map(r -> {
+                                String text = r.group(1);
+                                if (text != null) {
+                                    return Pattern.quote(text);
+                                }
+                                switch (r.group(2)) {
+                                    case "*":
+                                        return ".*";
+                                    case "?":
+                                        return ".";
+                                    default:
+                                        throw new IllegalStateException();
+                                }
+                            })
+                            .collect(Collectors.joining());
+
+                    pattern = Pattern.compile(regex,
                             (caseSensitive ? 0 : Pattern.CASE_INSENSITIVE) | Pattern.UNICODE_CASE);
                 } else {
                     throw new IllegalStateException("Must be pattern or regex");
