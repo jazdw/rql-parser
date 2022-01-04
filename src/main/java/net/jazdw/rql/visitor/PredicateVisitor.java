@@ -44,8 +44,6 @@ import net.jazdw.rql.util.TokenSpliterator;
 
 public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
 
-    private final Pattern REGEX_ESCAPE = Pattern.compile("([^*?]+)|([*?])");
-
     public static final Map<String, Integer> SHORT_OPERATOR_MAP = Map.of(
             "=", RqlParser.EQUALS,
             "==", RqlParser.EQUALS,
@@ -149,7 +147,7 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
                     Match match = new Match(inputStream);
                     match.removeErrorListeners();
                     match.addErrorListener(new ThrowWithDetailsErrorListener());
-                    
+
                     String regex = TokenSpliterator.stream(match)
                             .map(t -> {
                                 switch (t.getType()) {
