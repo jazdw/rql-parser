@@ -14,6 +14,7 @@
 
 package net.jazdw.rql.visitor;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -190,6 +191,9 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
                     if (propertyValue instanceof Collection) {
                         Collection<?> collectionValue = (Collection<?>) propertyValue;
                         return collectionValue.contains(firstArg);
+                    } else if (propertyValue instanceof Object[]) {
+                        Object[] collectionValue = (Object[]) propertyValue;
+                        return Arrays.asList(collectionValue).contains(firstArg);
                     } else if (propertyValue instanceof String) {
                         return ((String) propertyValue).contains(String.valueOf(firstArg));
                     }
