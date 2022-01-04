@@ -237,7 +237,17 @@ public class RqlParserTest {
     }
 
     @Test
-    public void matchRegexEscape() {
+    public void matchEscapedAsterisk() {
+        RqlParser parsed = createParser("match(test%5C*test)");
+        ExpressionContext value = parsed.expression();
+        PredicateVisitor<String> predicateVisitor = new PredicateVisitor<>(new DefaultTextDecoder(), valueVisitor, (item, prop) -> item);
+        Predicate<String> result = predicateVisitor.visit(value);
+        assertTrue(result.test("test*test"));
+        assertFalse(result.test("test1test"));
+    }
+
+    @Test
+    public void matchRegexQuoted() {
         RqlParser parsed = createParser("match(.)");
         ExpressionContext value = parsed.expression();
         PredicateVisitor<String> predicateVisitor = new PredicateVisitor<>(new DefaultTextDecoder(), valueVisitor, (item, prop) -> item);

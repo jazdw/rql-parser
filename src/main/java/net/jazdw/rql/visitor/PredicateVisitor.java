@@ -22,8 +22,11 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 
+import net.jazdw.rql.Match;
 import net.jazdw.rql.RqlBaseVisitor;
 import net.jazdw.rql.RqlParser;
 import net.jazdw.rql.RqlParser.AndContext;
@@ -36,6 +39,8 @@ import net.jazdw.rql.RqlParser.ShortPredicateContext;
 import net.jazdw.rql.RqlParser.ValueContext;
 import net.jazdw.rql.util.PropertyAccessor;
 import net.jazdw.rql.util.TextDecoder;
+import net.jazdw.rql.util.ThrowWithDetailsErrorListener;
+import net.jazdw.rql.util.TokenSpliterator;
 
 public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
 
@@ -140,19 +145,28 @@ public class PredicateVisitor<T> extends RqlBaseVisitor<Predicate<T>> {
                         caseSensitive = (boolean) valueVisitor.visitValue(secondArg);
                     }
 
-                    String regex = REGEX_ESCAPE.matcher(((String) firstArg)).results()
-                            .map(r -> {
-                                String text = r.group(1);
-                                if (text != null) {
-                                    return Pattern.quote(text);
-                                }
-                                switch (r.group(2)) {
-                                    case "*":
-                                        return ".*";
-                                    case "?":
+                    CharStream inputStream = CharStreams.fromString(((String) firstArg));
+                    Match match = new Match(inputStream);
+                    match.removeErrorListeners();
+                    match.addErrorListener(new ThrowWithDetailsErrorListener());
+                    
+                    String regex = TokenSpliterator.stream(match)
+                            .map(t -> {
+                                switch (t.getType()) {
+                                    case Match.MATCH_SINGLE:
                                         return ".";
+                                    case Match.MATCH_MANY:
+                                        return ".*";
+                                    case Match.QUESTION_MARK:
+                                        return Pattern.quote("?");
+                                    case Match.ASTERISK:
+                                        return Pattern.quote("*");
+                                    case Match.SLASH:
+                                        return Pattern.quote("\\");
+                                    case Match.OTHER:
+                                        return Pattern.quote(t.getText());
                                     default:
-                                        throw new IllegalStateException();
+                                        throw new IllegalStateException("Unknown token type " + t.getType());
                                 }
                             })
                             .collect(Collectors.joining());
