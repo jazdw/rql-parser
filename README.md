@@ -1,3 +1,7 @@
+[![Maven Central](https://img.shields.io/maven-central/v/net.jazdw/rql-parser)](https://search.maven.org/artifact/net.jazdw/rql-parser)
+[![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/jazdw/rql-parser)](https://snyk.io/vuln/maven%3Anet.jazdw%3Arql-parser)
+
+
 # rql-parser
 
 A Java [Resource Query Language](https://github.com/persvr/rql) (RQL) parser using [ANTLR 4](https://www.antlr.org/).
