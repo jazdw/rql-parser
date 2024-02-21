@@ -12,7 +12,8 @@
   ~ Lesser General Public License for more details.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.jazdw</groupId>
     <artifactId>rql-parser</artifactId>
@@ -36,7 +37,7 @@
     </developers>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <antlr.version>4.9.3</antlr.version>
+        <antlr.version>4.13.1</antlr.version>
     </properties>
     <build>
         <plugins>
@@ -72,10 +73,6 @@
                         <configuration>
                             <visitor>true</visitor>
                             <listener>true</listener>
-                            <!--                            <arguments>-->
-                            <!--                                <argument>-package</argument>-->
-                            <!--                                <argument>net.jazdw.rql</argument>-->
-                            <!--                            </arguments>-->
                         </configuration>
                     </execution>
                 </executions>
@@ -87,7 +84,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>3.14.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -100,6 +97,18 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>1.9.4</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
